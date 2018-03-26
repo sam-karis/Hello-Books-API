@@ -6,8 +6,10 @@ from .models import users, admin, books, bookHistory
 USERS = list()
 user1 = users(1, 'Joan', 'joan@andela.com', 'secretpassword')
 user2 = users(2, 'John', 'john@andela.com', 'hardpassword')
+user3 = users(3, "Jane", 'jane@andela.com', 'cluelesspas')
 USERS.append(user1)
 USERS.append(user2)
+USERS.append(user3)
 
 # Populate some data for admin
 ADMIN = list()
@@ -19,9 +21,9 @@ ADMIN.append(admin2)
 
 # Populate some data for books
 BOOKS = list()
-book1 = books('Data Science', 'Rpeng', '5th',
-              'Intro to data science with python', '2001', 5)
-book2 = books('Data Science', 'Sam', '6th',
-              'Intermidiate to data science with python', '2017', 3)
+book1 = books(1, 'Data Science', 'Rpeng', 'Intro to data science with python',
+              '5th', '2001', 5)
+book2 = books(2, 'Data Science', 'Sam', 'Intermidiate to data science with python',
+              '6th', '2017', 3)
 BOOKS.append(book1)
 BOOKS.append(book2)
