@@ -18,7 +18,7 @@ class TestBase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
 
-        book1 = books('Data Science', 'Rpeng', '5th',
+        book1 = books(1, 'Data Science', 'Rpeng', '5th',
                       'Intro to data science with python', '2001', 5)
 
         self.book = book1.serialize
