@@ -11,6 +11,15 @@ class users(object):
         self.email = email
         self.password = password
 
+    @property
+    def serialize(self):
+        return {
+            'user_id': self.user_id,
+            'username': self.username,
+            'email': self.email,
+            'password': self.password
+        }
+
 
 class admin(object):
     """Admin model."""
@@ -21,6 +30,15 @@ class admin(object):
         self.adminname = adminname
         self.email = email
         self.password = password
+
+    @property
+    def serialize(self):
+        return {
+            'admin_id': self.admin_id,
+            'adminname': self.adminname,
+            'email': self.email,
+            'password': self.password
+        }
 
 
 class books(object):
@@ -34,6 +52,17 @@ class books(object):
         self.edition = edition
         self.pyear = pyear
         self.quantity = quantity
+    
+    @property
+    def serialize(self):
+        return {
+            'title': self.title,
+            'author': self.author,
+            'description': self.description,
+            'edition': self.edition,
+            'pyear': self.pyear,
+            'quantity': self.quantity
+        }
 
 
 class bookHistory(object):
@@ -46,3 +75,13 @@ class bookHistory(object):
         self.dateBorrowed = dateBorrowed
         self.dateReturned = dateReturned
         self.status = status
+
+    @property
+    def serialize(self):
+        return {
+            'title': self.title,
+            'user_id': self.user_id,
+            'dateBorrowed': self.dateBorrowed,
+            'dateReturned': self.dateReturned,
+            'status': self.status
+        }
