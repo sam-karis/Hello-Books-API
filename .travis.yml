@@ -1,1 +1,12 @@
 language: python
+python:
+  - "3.6.4"
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+
+script: 
+  - python tests_api.py
+  - python tests_models.py
+after_success:
+  coveralls
