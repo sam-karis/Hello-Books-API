@@ -3,12 +3,12 @@ import json
 from flask import jsonify, request
 from app import app
 from .models import users
+from .setup_data import BOOKS
 
 
 @app.route('/')
 def hello():
     """Introduction to app."""
-<<<<<<< HEAD
     return "WELCOME TO HELLO BOOKS"
 
 
@@ -18,7 +18,6 @@ def addBook():
     if request.method == 'POST':
         return "It is a post request"
     return "Not a post method"
-=======
     return "WELCOME TO HELLO BOOKS!"
 
 
@@ -153,4 +152,3 @@ def delete_book_handler(bookId):
         BOOKS.remove(book)
         return "Book deleted successfully"
     return 'No book with that Id to delete.'
->>>>>>> endpoints
