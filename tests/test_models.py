@@ -24,7 +24,7 @@ class TestModels(unittest.TestCase):
     def test_books_model(self):
         """Test number of books."""
         Books = list()
-        Books.append(books('Data Science', 'Rpeng', '5th',
+        Books.append(books(1, 'Data Science', 'Rpeng', '5th',
                            'Intro to data science with python', '2001', 5))
         self.assertEqual(len(Books), 1)
 
