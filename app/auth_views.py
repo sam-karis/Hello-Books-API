@@ -2,6 +2,8 @@
 import json
 from flask import jsonify, request
 from app import app
+from app.models import Users
+from app.setup_data import USERS
 
 
 @app.route('/api/v1/auth')
@@ -13,7 +15,22 @@ def auth_home():
 @app.route('/api/v1/auth/register', methods=['POST'])
 def register_user():
     """Endpoint for a new user to register."""
-    return jsonify({'Message': 'User should register'})
+    user_id = request.args.get('user_id')
+    name = request.args.get('name')
+    email = request.args.get('email')
+    password = request.args.get('password')
+
+    if email not in [user.email for user in USERS]:
+        new_user = Users(user_id, name, email, password)
+        USERS.append(new_user)
+
+        response = jsonify({'Message': 'User has successfully registered'})
+        response.status_code = 201
+        return response
+    else:
+        response = jsonify({'Message': 'User already registered'})
+        response.status_code = 202
+        return response
 
 
 @app.route('/api/v1/auth/login', methods=['POST'])
