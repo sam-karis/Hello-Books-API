@@ -22,6 +22,7 @@ def register_user():
 
     if email not in [user.email for user in USERS]:
         new_user = Users(user_id, name, email, password)
+        new_user.hash_password(password)
         USERS.append(new_user)
 
         response = jsonify({'Message': 'User has successfully registered'})
@@ -36,7 +37,21 @@ def register_user():
 @app.route('/api/v1/auth/login', methods=['POST'])
 def user_login():
     """Endpoint for user to login."""
-    return jsonify({'Message': 'User should log in'})
+    email = request.args.get('email')
+    password = request.args.get('password')
+
+    if email in [user.email for user in USERS]:
+        for user in USERS:
+            if user.email is email:
+                break
+        if user.check_password(password):
+            return jsonify({'Message': 'Successfuly login'}), 200
+        else:
+            response = jsonify({'Messsage': 'Invalid email or password'})
+            response.status_code = 401
+            return response
+    return jsonify({'Messsage': 'User with that email does not exist'}), 404
+
 
 
 @app.route('/api/v1/auth/logout', methods=['POST'])

@@ -9,7 +9,7 @@ class Person(object):
         """Initialize the users class."""
         self.name = name
         self.email = email
-        self.password = generate_password_hash(password)
+        self.password = password
 
 
 class Users(Person):
@@ -19,6 +19,14 @@ class Users(Person):
         """Initialize the users class."""
         self.user_id = user_id
         Person.__init__(self, name, email, password)
+
+    def hash_password(self, password):
+        """Hash password."""
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check password given is valid."""
+        return check_password_hash(self.password, password)
 
     @property
     def serialize(self):
