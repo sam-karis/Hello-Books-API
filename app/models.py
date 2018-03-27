@@ -52,7 +52,9 @@ class admin(person):
 class books(object):
     """books models."""
 
-    def __init__(self, book_Id, title, author, description, edition, pyear, quantity):
+    def __init__(
+        self, book_Id, title, author, description, edition, pyear, quantity
+    ):
         """Initialize the model."""
         self.book_Id = book_Id
         self.title = title
@@ -88,6 +90,7 @@ class bookHistory(object):
 
     @property
     def serialize(self):
+        """Serialize bookHistory."""
         return {
             'book_Id': self.book_Id,
             'user_Id': self.user_Id,

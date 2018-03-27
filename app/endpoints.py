@@ -9,15 +9,6 @@ from .setup_data import BOOKS
 @app.route('/')
 def hello():
     """Introduction to app."""
-    return "WELCOME TO HELLO BOOKS"
-
-
-@app.route('/api/v1/books', methods=['POST', 'PUT'])
-def addBook():
-    """add books to app."""
-    if request.method == 'POST':
-        return "It is a post request"
-    return "Not a post method"
     return "WELCOME TO HELLO BOOKS!"
 
 
