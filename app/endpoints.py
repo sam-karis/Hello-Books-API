@@ -2,7 +2,7 @@
 import json
 from flask import jsonify, request
 from app import app
-from .models import users, books
+from .models import Users, Books
 from .setup_data import BOOKS
 
 
@@ -59,7 +59,7 @@ def add_book():
     if quantity is None:
         return 'What is the quantity of book/books you are adding?'
 
-    book_added = books(book_id, title, author,
+    book_added = Books(book_id, title, author,
                        description, edition, pyear, quantity)
 
     # check if the book exist.
