@@ -14,16 +14,16 @@ class person(object):
 class users(person):
     """Users model."""
 
-    def __init__(self, user_Id, name, email, password):
+    def __init__(self, user_id, name, email, password):
         """Initialize the users class."""
-        self.user_Id = user_Id
+        self.user_id = user_id
         person.__init__(self, name, email, password)
 
     @property
     def serialize(self):
         """Serialize user Id."""
         return {
-            'user_Id': self.user_Id,
+            'user_id': self.user_id,
             'name': self.name,
             'email': self.email,
             'password': self.password
@@ -33,16 +33,16 @@ class users(person):
 class admin(person):
     """Admin model."""
 
-    def __init__(self, admin_Id, name, email, password):
+    def __init__(self, admin_id, name, email, password):
         """Initialize the admin model."""
-        self.admin_Id = admin_Id
+        self.admin_id = admin_id
         person.__init__(self, name, email, password)
 
     @property
     def serialize(self):
         """Serialize admin Id."""
         return {
-            'admin_Id': self.admin_Id,
+            'admin_Id': self.admin_id,
             'name': self.name,
             'email': self.email,
             'password': self.password
@@ -53,10 +53,10 @@ class books(object):
     """books models."""
 
     def __init__(
-        self, book_Id, title, author, description, edition, pyear, quantity
+        self, book_id, title, author, description, edition, pyear, quantity
     ):
         """Initialize the model."""
-        self.book_Id = book_Id
+        self.book_id = book_id
         self.title = title
         self.author = author
         self.description = description
@@ -66,8 +66,9 @@ class books(object):
 
     @property
     def serialize(self):
+        """Serialize."""
         return {
-            'book_Id': self.book_Id,
+            'book_id': self.book_id,
             'title': self.title,
             'author': self.author,
             'description': self.description,

@@ -1,6 +1,7 @@
 """Unittest for API endpoints."""
 import unittest
 import json
+from flask import jsonify
 
 # local imports.
 from app import app, create_app
@@ -28,17 +29,16 @@ class TestBase(unittest.TestCase):
 
     def test_index(self):
         """Test index route."""
-        response = self.client.get('/', content_type='html/text')
+        response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'WELCOME TO HELLO BOOKS!')
 
-    def test_add_book_handler(self):
+    def test_add_book(self):
         """Test add a book endpoint."""
         response = self.client.post('/api/v1/books',
                                     data=json.dumps(self.book))
         self.assertEqual(response.status_code, 200)
 
-    def test_get_book_handler(self):
+    def test_get_book(self):
         """Test get book route."""
         response = self.client.get('/api/v1/books', )
         self.assertEqual(response.status_code, 200)

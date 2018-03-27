@@ -2,35 +2,36 @@
 import json
 from flask import jsonify, request
 from app import app
-from .models import users
+from .models import users, books
 from .setup_data import BOOKS
 
 
 @app.route('/')
+@app.route('/api/v1')
 def hello():
     """Introduction to app."""
-    return "WELCOME TO HELLO BOOKS!"
+    return jsonify({'Message': 'WELCOME TO HELLO BOOKS'})
 
 
 @app.route('/api/v1/books', methods=['GET', 'POST'])
 def all_book_handler():
-    """Handle books access."""
+    """Handle viewing of all books and adding a book."""
     if request.method == 'GET':
-        return get_all_book_handler()
+        return get_all_book()
 
     elif request.method == 'POST':
-        return add_book_handler()
+        return add_book()
 
 
-def get_all_book_handler():
-    """Get all books."""
+def get_all_book():
+    """Return all books."""
     return jsonify(books=[item.serialize for item in BOOKS])
 
 
-def add_book_handler():
+def add_book():
     """Add books."""
     # Get details of the book to be added
-    book_Id = request.args.get('book_Id')
+    book_id = request.args.get('book_id')
     title = request.args.get('title')
     author = request.args.get('author')
     description = request.args.get('description')
@@ -38,12 +39,12 @@ def add_book_handler():
     pyear = request.args.get('pyear')
     quantity = request.args.get('quantity')
 
-    if book_Id is None:
-        return 'Enter book_Id like {}'.format(len(BOOKS) + 1)
+    if book_id in [None, ""]:
+        return 'Enter book_id like {}'.format(len(BOOKS) + 1)
     else:
-        book_Id = int(book_Id)
+        book_id = int(book_id)
 
-    if book_Id in [book.book_Id for book in BOOKS]:
+    if book_id in [book.book_id for book in BOOKS]:
         return 'The book_Id exists choose another one.'
     if title is None:
         return 'Give your book a title.'
@@ -58,14 +59,14 @@ def add_book_handler():
     if quantity is None:
         return 'What is the quantity of book/books you are adding?'
 
-    bookadded = books(book_Id, title, author,
-                      description, edition, pyear, quantity)
+    book_added = books(book_id, title, author,
+                       description, edition, pyear, quantity)
 
     # check if the book exist.
-    if bookadded in [book for book in BOOKS]:
+    if book_added in [book for book in BOOKS]:
         return 'A book with that title arleady exist.'
     else:
-        BOOKS.append(bookadded)
+        BOOKS.append(book_added)
         return 'Book added successfully.'
 
 
@@ -74,35 +75,35 @@ def specific_book_handler(bookId):
     """Endpoint to interact with specific book."""
     if request.method == 'GET':
 
-        return get_book_handler(bookId)
+        return get_book(bookId)
 
     elif request.method == 'PUT':
 
-        return modify_book_handler(bookId)
+        return modify_book(bookId)
 
     elif request.method == 'DELETE':
-        return delete_book_handler(bookId)
+        return delete_book(bookId)
 
 
-def get_book_handler(bookId):
+def get_book(bookId):
     """Get a book by Id."""
     bookId = int(bookId)
     for book in BOOKS:
-        if book.book_Id == bookId:
+        if book.book_id == bookId:
             return jsonify(book.serialize)
     return 'No book with that Id.'
 
 
-def modify_book_handler(bookId):
+def modify_book(bookId):
     """Update/modify a book by Id."""
     bookId = int(bookId)
     for book in BOOKS:
-        if book.book_Id == bookId:
+        if book.book_id == bookId:
             break
     if book is None:
         return 'No book with that Id.'
     # get variable update
-    book_Id = request.args.get('book_Id')
+    book_id = request.args.get('book_id')
     title = request.args.get('title')
     author = request.args.get('author')
     description = request.args.get('description')
@@ -112,7 +113,7 @@ def modify_book_handler(bookId):
 
     # check if the variable is to be updated
     try:
-        if book_Id:
+        if book_id:
             return 'You cannot modify a Book Id'
         if title:
             book.title = title
@@ -132,14 +133,14 @@ def modify_book_handler(bookId):
     return 'Your update is successful.'
 
 
-def delete_book_handler(bookId):
+def delete_book(bookId):
     """Remove a book by Id."""
     bookId = int(bookId)
     for book in BOOKS:
-        if book.book_Id == bookId:
-            bookToDelete = book
+        if book.book_id == bookId:
+            book_to_delete = book
             break
-    if bookToDelete is not None:
+    if book_to_delete is not None:
         BOOKS.remove(book)
         return "Book deleted successfully"
     return 'No book with that Id to delete.'
