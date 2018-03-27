@@ -14,4 +14,4 @@ def create_app(config_name):
 
 
 from app import endpoints
-from app import auth_endpoints
+from app import auth_views
