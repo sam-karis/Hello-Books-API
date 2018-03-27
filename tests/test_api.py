@@ -5,13 +5,14 @@ from flask import jsonify
 
 # local imports.
 from app import app, create_app
-from app.models import books
+from app.models import Books
 
 
 class TestBase(unittest.TestCase):
     """Test api endpoints."""
 
     def setUp(self):
+        """SetUp test."""
         config_name = 'testing'
         app = create_app(config_name)
         self.app = app
@@ -19,13 +20,10 @@ class TestBase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
 
-        book1 = books(1, 'Data Science', 'Rpeng', '5th',
-                      'Intro to data science with python', '2001', 5)
+        book_1 = Books(3, 'Data Sience', 'Rpeng', '5th',
+                       'Intro to data science with python', '2001', 5)
 
-        self.book = book1.serialize
-
-    def tearDown(self):
-        self.app_context.pop()
+        self.book = book_1.serialize
 
     def test_index(self):
         """Test index route."""
@@ -38,10 +36,21 @@ class TestBase(unittest.TestCase):
                                     data=json.dumps(self.book))
         self.assertEqual(response.status_code, 200)
 
+    def test_get_all_books(self):
+        """Test get book route."""
+        response = self.client.get('/api/v1/books')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Data Science', str(response.data))
+
     def test_get_book(self):
         """Test get book route."""
-        response = self.client.get('/api/v1/books', )
+        response = self.client.get('/api/v1/books/1')
         self.assertEqual(response.status_code, 200)
+        self.assertIn('Data Science', str(response.data))
+
+    def tearDown(self):
+        """End test."""
+        self.app_context.pop()
 
 
 if __name__ == '__main__':
