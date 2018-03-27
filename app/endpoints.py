@@ -1,15 +1,24 @@
-
 """Create Hello Books API endpoints."""
 import json
 from flask import jsonify, request
 from app import app
-from .models import admin, users, books, bookHistory
-from .setup_data import BOOKS, USERS, ADMIN
+from .models import users
 
 
 @app.route('/')
 def hello():
     """Introduction to app."""
+<<<<<<< HEAD
+    return "WELCOME TO HELLO BOOKS"
+
+
+@app.route('/api/v1/books', methods=['POST', 'PUT'])
+def addBook():
+    """add books to app."""
+    if request.method == 'POST':
+        return "It is a post request"
+    return "Not a post method"
+=======
     return "WELCOME TO HELLO BOOKS!"
 
 
@@ -144,3 +153,4 @@ def delete_book_handler(bookId):
         BOOKS.remove(book)
         return "Book deleted successfully"
     return 'No book with that Id to delete.'
+>>>>>>> endpoints

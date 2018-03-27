@@ -18,7 +18,7 @@ class TestModels(unittest.TestCase):
         """Test number of admin."""
         Admin = list()
         Admin.append(admin(1, 'Sam', 'sam@andela.com', 'hardtoguess'))
-        Admin.append(admin(2, 'Rose', 'rose@andela.com', 'privatepassword'))
+        Admin.append(admin(2, 'Sam', 'sam@andela.com', 'hardtoguess'))
         self.assertEqual(len(Admin), 2)
 
     def test_books_model(self):

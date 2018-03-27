@@ -6,18 +6,12 @@ class Config(object):
     """Common configuration Setting."""
 
     DEBUG = False
-    TESTING = False
 
 
 class DevelopmentConfig(Config):
     """Configuration setting at development stage."""
 
     DEBUG = True
-
-
-class TestingConfig(Config):
-    """Configuration setting at testing stage."""
-
     TESTING = True
 
 
@@ -30,6 +24,5 @@ class ProductionConfig(Config):
 
 app_config = {
     'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'testing': TestingConfig
+    'production': ProductionConfig
 }
