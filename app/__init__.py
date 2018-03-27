@@ -4,6 +4,7 @@ app = Flask(__name__, instance_relative_config=True)
 # local import
 from config import app_config
 
+
 def create_app(config_name):
     """Create the app."""
     app.config.from_object(app_config[config_name])
@@ -13,3 +14,4 @@ def create_app(config_name):
 
 
 from app import endpoints
+from app import auth_endpoints
