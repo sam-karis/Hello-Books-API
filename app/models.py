@@ -1,4 +1,5 @@
 """Hello Books models."""
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class Person(object):
@@ -8,7 +9,7 @@ class Person(object):
         """Initialize the users class."""
         self.name = name
         self.email = email
-        self.password = password
+        self.password = generate_password_hash(password)
 
 
 class Users(Person):

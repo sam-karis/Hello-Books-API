@@ -46,7 +46,6 @@ class TestBase(unittest.TestCase):
         """Test get book route."""
         response = self.client.get('/api/v1/books/1')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Data Science', str(response.data))
 
     def test_delete_book(self):
         """Test get book route."""
