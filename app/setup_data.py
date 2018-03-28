@@ -5,8 +5,11 @@ from .models import Users, Admin, Books, BookHistory
 # Populate some data for users
 USERS = list()
 user_1 = Users(1, 'Joan', 'joan@andela.com', 'secretpassword')
+user_1.hash_password('secretpassword')
 user_2 = Users(2, 'John', 'john@andela.com', 'hardpassword')
-user_3 = Users(3, "Jane", 'jane@andela.com', 'cluelesspas')
+user_2.hash_password('hardpassword')
+user_3 = Users(3, "Jane", 'jane@andela.com', 'cluelesspass')
+user_3.hash_password('cluelesspass')
 USERS.append(user_1)
 USERS.append(user_2)
 USERS.append(user_3)
