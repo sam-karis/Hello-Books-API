@@ -1,27 +1,36 @@
 """Populate some data using python data stractures."""
 
-from .models import users, admin, books, bookHistory
+from .models import Users, Admin, Books, BookHistory
 
 # Populate some data for users
 USERS = list()
-user1 = users(1, 'Joan', 'joan@andela.com', 'secretpassword')
-user2 = users(2, 'John', 'john@andela.com', 'hardpassword')
-USERS.append(user1)
-USERS.append(user2)
+user_1 = Users(1, 'Joan', 'joan@andela.com', 'secretpassword')
+user_1.hash_password('secretpassword')
+user_2 = Users(2, 'John', 'john@andela.com', 'hardpassword')
+user_2.hash_password('hardpassword')
+user_3 = Users(3, "Jane", 'jane@andela.com', 'cluelesspass')
+user_3.hash_password('cluelesspass')
+USERS.append(user_1)
+USERS.append(user_2)
+USERS.append(user_3)
 
 # Populate some data for admin
 ADMIN = list()
-admin1 = admin(1, 'Sam', 'sam@andela.com', 'hardtoguess')
-admin2 = admin(2, 'peris', 'peris@andela.com', 'awesome4321')
-ADMIN.append(admin1)
-ADMIN.append(admin2)
+admin_1 = Admin(1, 'Sam', 'sam@andela.com', 'hardtoguess')
+admin_2 = Admin(2, 'peris', 'peris@andela.com', 'awesome4321')
+ADMIN.append(admin_1)
+ADMIN.append(admin_2)
 
 
 # Populate some data for books
 BOOKS = list()
-book1 = books('Data Science', 'Rpeng', '5th',
-              'Intro to data science with python', '2001', 5)
-book2 = books('Data Science', 'Sam', '6th',
-              'Intermidiate to data science with python', '2017', 3)
-BOOKS.append(book1)
-BOOKS.append(book2)
+book_1 = Books(
+    1, 'Data Science', 'Rpeng', 'Intro to data science with python',
+    '5th', '2001', 5
+)
+book_2 = Books(
+    2, 'Data Science', 'Sam', 'Intermidiate to data science with python',
+    '6th', '2017', 3
+)
+BOOKS.append(book_1)
+BOOKS.append(book_2)

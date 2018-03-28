@@ -1,7 +1,8 @@
 """Hello Books models."""
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
-class person(object):
+class Person(object):
     """Common class for admin and user."""
 
     def __init__(self, name, email, password):
@@ -11,50 +12,60 @@ class person(object):
         self.password = password
 
 
-class users(person):
+class Users(Person):
     """Users model."""
 
-    def __init__(self, user_Id, name, email, password):
+    def __init__(self, user_id, name, email, password):
         """Initialize the users class."""
-        self.user_Id = user_Id
-        person.__init__(self, name, email, password)
+        self.user_id = user_id
+        Person.__init__(self, name, email, password)
+
+    def hash_password(self, password):
+        """Hash password."""
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check password given is valid."""
+        return check_password_hash(self.password, password)
 
     @property
     def serialize(self):
         """Serialize user Id."""
         return {
-            'user_Id': self.user_Id,
+            'user_id': self.user_id,
             'name': self.name,
             'email': self.email,
             'password': self.password
         }
 
 
-class admin(person):
+class Admin(Person):
     """Admin model."""
 
-    def __init__(self, admin_Id, name, email, password):
+    def __init__(self, admin_id, name, email, password):
         """Initialize the admin model."""
-        self.admin_Id = admin_Id
-        person.__init__(self, name, email, password)
+        self.admin_id = admin_id
+        Person.__init__(self, name, email, password)
 
     @property
     def serialize(self):
         """Serialize admin Id."""
         return {
-            'admin_Id': self.admin_Id,
+            'admin_Id': self.admin_id,
             'name': self.name,
             'email': self.email,
             'password': self.password
         }
 
 
-class books(object):
+class Books(object):
     """books models."""
 
-    def __init__(self, book_Id, title, author, description, edition, pyear, quantity):
+    def __init__(
+        self, book_id, title, author, description, edition, pyear, quantity
+    ):
         """Initialize the model."""
-        self.book_Id = book_Id
+        self.book_id = book_id
         self.title = title
         self.author = author
         self.description = description
@@ -64,8 +75,9 @@ class books(object):
 
     @property
     def serialize(self):
+        """Serialize."""
         return {
-            'book_Id': self.book_Id,
+            'book_id': self.book_id,
             'title': self.title,
             'author': self.author,
             'description': self.description,
@@ -75,22 +87,23 @@ class books(object):
         }
 
 
-class bookHistory(object):
+class BookHistory(object):
     """books model to record return and borrowing of a book."""
 
-    def __init__(self, book_Id, user_Id, dateBorrowed, dateReturned, status):
+    def __init__(self, book_id, user_id, dateBorrowed, dateReturned, status):
         """Initialize the model."""
-        self.book_Id = book_Id
-        self.user_Id = user_Id
+        self.book_id = book_id
+        self.user_id = user_id
         self.dateBorrowed = dateBorrowed
         self.dateReturned = dateReturned
         self.status = status
 
     @property
     def serialize(self):
+        """Serialize bookHistory."""
         return {
-            'book_Id': self.book_Id,
-            'user_Id': self.user_Id,
+            'book_id': self.book_id,
+            'user_id': self.user_id,
             'dateBorrowed': self.dateBorrowed,
             'dateReturned': self.dateReturned,
             'status': self.status
