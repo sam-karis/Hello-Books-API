@@ -40,34 +40,39 @@ def add_book():
     quantity = request.args.get('quantity')
 
     if book_id in [None, ""]:
-        return 'Enter book_id like {}'.format(len(BOOKS) + 1)
+        return jsonify(
+            {'Message': 'Fill in the book Id an example is {}'.format(
+                len(BOOKS) + 1)}
+        )
     else:
         book_id = int(book_id)
 
     if book_id in [book.book_id for book in BOOKS]:
-        return 'The book_Id exists choose another one.'
+        return jsonify({'Message': 'The book_Id exists choose another one.'})
     if title is None:
-        return 'Give your book a title.'
+        return jsonify({'Message': 'Give your book a title.'})
     if author is None:
-        return 'Give the author of the book'
+        return jsonify({'Message': 'Give the author of the book'})
     if description is None and type(description) is int:
-        return 'Give your book a short description'
+        return jsonify({'Message': 'Give your book a short description'})
     if edition is None:
-        return 'What is the edition of this book?'
+        return jsonify({'Message': 'What is the edition of this book?'})
     if pyear is None:
-        return 'Give your book a pyear(Publish year)'
+        return jsonify({'Message': 'Give your book a pyear(Publish year)'})
     if quantity is None:
-        return 'What is the quantity of book/books you are adding?'
+        return jsonify(
+            {'Message': 'What is the quantity of book/books you are adding?'}
+        )
 
     book_added = Books(book_id, title, author,
                        description, edition, pyear, quantity)
 
     # check if the book exist.
     if book_added in [book for book in BOOKS]:
-        return 'A book with that title arleady exist.'
+        return jsonify({'Message': 'A book with that title already exist.'})
     else:
         BOOKS.append(book_added)
-        return 'Book added successfully.'
+        return jsonify({'Message': 'Book added successfully.'})
 
 
 @app.route('/api/v1/books/<bookId>', methods=['GET', 'PUT', 'DELETE'])
@@ -91,7 +96,7 @@ def get_book(bookId):
     for book in BOOKS:
         if book.book_id == bookId:
             return jsonify(book.serialize)
-    return 'No book with that Id.'
+    return jsonify({'Message': 'No book with that Id.'})
 
 
 def modify_book(bookId):
@@ -135,12 +140,16 @@ def modify_book(bookId):
 
 def delete_book(bookId):
     """Remove a book by Id."""
-    bookId = int(bookId)
-    for book in BOOKS:
-        if book.book_id == bookId:
-            book_to_delete = book
-            break
-    if book_to_delete is not None:
-        BOOKS.remove(book)
-        return "Book deleted successfully"
-    return 'No book with that Id to delete.'
+    if bookId in [None, ""] or not int(bookId):
+        return jsonify({'Message': 'Enter a valid book id'})
+    else:
+        bookId = int(bookId)
+        if bookId not in [book.book_id for book in BOOKS]:
+            return jsonify({'Message': 'No book with that Id to delete.'})
+        for book in BOOKS:
+            if book.book_id == bookId:
+                book_to_delete = book
+                break
+        if book_to_delete is not None:
+            BOOKS.remove(book)
+            return jsonify({'Message': "Book deleted successfully"})
