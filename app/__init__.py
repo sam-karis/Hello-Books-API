@@ -14,5 +14,4 @@ def create_app(config_name):
     return app
 
 
-from app import books_views
-from app import auth_views
+from app import books_views, auth_views, users_views

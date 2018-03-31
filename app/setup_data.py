@@ -25,12 +25,12 @@ ADMIN.append(admin_2)
 # Populate some data for books
 BOOKS = list()
 book_1 = Books(
-    1, 'Data Science', 'Rpeng', 'Intro to data science with python',
-    '5th', '2001', 5
+    1, 'Data Science', 'Rpeng', 'Intro to data science with python', '5th'
 )
 book_2 = Books(
-    2, 'Data Science', 'Sam', 'Intermidiate to data science with python',
-    '6th', '2017', 3
+    2, 'Data Mining', 'Sam', 'Intermidiate to data science with SQL', '6th'
 )
 BOOKS.append(book_1)
 BOOKS.append(book_2)
+
+BOOKHISTORY = list()
