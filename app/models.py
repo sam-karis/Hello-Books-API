@@ -62,7 +62,7 @@ class Books(object):
     """books models."""
 
     def __init__(
-        self, book_id, title, author, description, edition, pyear, quantity
+        self, book_id, title, author, description, edition, status="Available"
     ):
         """Initialize the model."""
         self.book_id = book_id
@@ -70,8 +70,7 @@ class Books(object):
         self.author = author
         self.description = description
         self.edition = edition
-        self.pyear = pyear
-        self.quantity = quantity
+        self.status = status
 
     @property
     def serialize(self):
@@ -82,29 +81,29 @@ class Books(object):
             'author': self.author,
             'description': self.description,
             'edition': self.edition,
-            'pyear': self.pyear,
-            'quantity': self.quantity
+            'status': self.status
         }
 
 
 class BookHistory(object):
     """books model to record return and borrowing of a book."""
 
-    def __init__(self, book_id, user_id, dateBorrowed, dateReturned, status):
+    def __init__(self, book_id, book_title,
+                 user_name, return_date, status="Not returned"):
         """Initialize the model."""
         self.book_id = book_id
-        self.user_id = user_id
-        self.dateBorrowed = dateBorrowed
-        self.dateReturned = dateReturned
+        self.book_title = book_title
+        self.user_name = user_name
+        self.return_date = return_date
         self.status = status
 
     @property
     def serialize(self):
         """Serialize bookHistory."""
         return {
-            'book_id': self.book_id,
-            'user_id': self.user_id,
-            'dateBorrowed': self.dateBorrowed,
-            'dateReturned': self.dateReturned,
+            "book_id": self.book_id,
+            'book_title': self.book_title,
+            'user_name': self.user_name,
+            'return_date': self.return_date,
             'status': self.status
         }
