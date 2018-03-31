@@ -25,7 +25,6 @@ def register_user():
         new_user = Users(user_id, name, email, password)
         new_user.hash_password(password)
         USERS.append(new_user)
-
         return jsonify({'Message': 'User has successfully registered'})
     else:
         return jsonify({'Message': 'User already registered'})
@@ -37,30 +36,41 @@ def user_login():
     email = request.json.get('email')
     password = request.json.get('password')
 
+    if email is None or password is None:
+        return jsonify({"Message": "Enter both your email and password"})
     if email in [user.email for user in USERS]:
-        for user in USERS:
-            if user.email == email:
-                break
-        if user.check_password(password):
-            session['logged_in'] = True
-            return jsonify({'Message': 'Successfuly login'}), 200
-
+        if session.get(email):
+            response = jsonify({'Message': 'You are already logged In'})
         else:
-            response = jsonify({'Messsage': 'Invalid email or password'})
-            response.status_code = 401
-            # return response
-            return jsonify(user.serialize)
+            for user in USERS:
+                if user.email == email:
+                    break
+            if user.check_password(password):
+                session[email] = True
+                response = jsonify({'Message': 'Successfuly login'}), 200
+
+            else:
+                response = jsonify({'Messsage': 'Invalid email or password'})
+        return response
     return jsonify({'Messsage': 'User with that email does not exist'}), 404
 
 
 @app.route('/api/v1/auth/logout', methods=['POST'])
 def user_logout():
     """Endpoint for user to logout."""
-    if session['logged_in']:
-        session['logged_in'] = False
-        return jsonify({'Message': 'Successfuly logged Out'})
+    email = request.json.get('email')
+    if email is None:
+        response = jsonify({
+            "Message": "Enter the email of the user you want to logout."
+        })
     else:
-        return jsonify({'Message': 'You are not logged In'})
+        if session.get(email):
+            session[email] = False
+            response = jsonify({'Message': 'Successfuly logged Out'})
+        else:
+            response = jsonify({'Message': 'User of {} is not logged In'
+                                .format(email)})
+    return response
 
 
 @app.route('/api/v1/auth/reset-password', methods=['POST'])

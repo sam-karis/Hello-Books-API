@@ -29,8 +29,6 @@ def add_book():
     author = request.json.get('author')
     description = request.json.get('description')
     edition = request.json.get('edition')
-    pyear = request.json.get('pyear')
-    quantity = request.json.get('quantity')
 
     if title is None:
         return jsonify({'Message': 'Give your book a title.'})
@@ -40,15 +38,8 @@ def add_book():
         return jsonify({'Message': 'Give your book a short description'})
     if edition is None:
         return jsonify({'Message': 'What is the edition of this book?'})
-    if pyear is None:
-        return jsonify({'Message': 'Give your book a pyear(Publish year)'})
-    if quantity is None:
-        return jsonify(
-            {'Message': 'What is the quantity of book/books you are adding?'}
-        )
 
-    book_added = Books(book_id, title, author,
-                       description, edition, pyear, quantity)
+    book_added = Books(book_id, title, author, description, edition)
 
     # check if the book title exist.
     if book_added.title in [book.title for book in BOOKS]:
@@ -94,8 +85,6 @@ def modify_book(bookId):
     author = request.json.get('author')
     description = request.json.get('description')
     edition = request.json.get('edition')
-    pyear = request.json.get('pyear')
-    quantity = request.json.get('quantity')
 
     # check if the variable is to be updated
     try:
@@ -107,10 +96,6 @@ def modify_book(bookId):
             book.description = description
         if edition:
             book.edition = edition
-        if pyear:
-            book.pyear = pyear
-        if quantity:
-            book.quantity = quantity
     except:
         return jsonify({'Message': 'No update done.'})
 

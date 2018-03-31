@@ -26,15 +26,14 @@ class TestModels(unittest.TestCase):
         """Test number of books."""
         BOOK = list()
         BOOK.append(Books(1, 'Data Science', 'Rpeng', '5th',
-                          'Intro to data science with python', '2001', 5))
+                          'Intro to data science with python'))
         self.assertEqual(len(BOOK), 1)
         self.assertEqual(BOOK[0].title, 'Data Science')
 
     def test_bookHistory_model(self):
         """Test number of bookHistory ever borrowed."""
         BOOKHISTORY = list()
-        BOOKHISTORY.append(BookHistory('Data Science', '1',
-                                       '12-3-2013', '12-4-2013', 'Returned'))
+        BOOKHISTORY.append(BookHistory(1, 'Data Science', 'Joan', "12-4-2018"))
         self.assertEqual(len(BOOKHISTORY), 1)
 
 

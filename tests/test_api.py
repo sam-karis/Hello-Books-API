@@ -2,7 +2,6 @@
 import unittest
 import json
 from flask import jsonify
-
 # local imports.
 from app import app, create_app
 from app.models import Books, Users
@@ -22,57 +21,49 @@ class TestBooksEndpoints(unittest.TestCase):
         self.app_context.push()
 
         book_one = Books(3, 'Data Sience for Dummies', 'Rpeng', '5th',
-                         'Intro to data science with python', '2001', 5)
+                         'Intro to data science with python')
 
-        self.book_one_update = {
-            "author": "Justmesam",
-            "title": "My journey to Andela"
-        }
+        self.book_one_update = {"author": "Justmesam",
+                                "title": "My journey to Andela"}
 
         self.book = book_one.serialize
 
         # User sample details to register
-        user_one = Users(10, "Jack", 'jack@andela.com', "secretpass")
+        user_one = Users(10, "Jack", "jack@andela.com", "secretpass")
         self.user = user_one.serialize
 
         # User details to login
-        self.user_login_details = {
-            "email": "jack@andela.com",
-            "password": "secretpass"
-        }
+        self.user_login_details = {"email": "jack@andela.com",
+                                   "password": "secretpass"}
 
-        self.user_one_reset = {
-            "email": "jack@andela.com",
-            "password": "uniquepass"
-        }
+        # user to test borrow book endpoint
+        self.user_to_borrow = {"email": "john@andela.com",
+                               "password": "hardpassword"}
+        self.user_to_borrow_email = {"email": "john@andela.com"}
 
-    def tearDown(self):
-        """Return to normal state after test."""
-        self.app_context.pop()
+        # User new password
+        self.user_one_reset = {"email": "jack@andela.com",
+                               "password": "uniquepass"}
 
     def test_add_book(self):
         """Test add a book endpoint."""
         # Add a new book
-        response = self.client.post('/api/v1/books',
-                                    data=json.dumps(self.book),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
+        response = self.client.post(
+            '/api/v1/books', data=json.dumps(self.book),
+            headers={'content-type': 'application/json'})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Book added successfully.',
-                      response.get_data().decode('utf-8'),
-                      msg="Book added successfully")
+        self.assertIn(
+            'Book added successfully.', response.get_data().decode('utf-8'),
+            msg="Book added successfully")
 
         # Add a book that already exist
-        response_two = self.client.post('/api/v1/books',
-                                        data=json.dumps(self.book),
-                                        headers={
-                                            'content-type': 'application/json'
-                                        })
-        # Test that the endpoint does not add two similar books
-        self.assertIn('A book with that title already exist.',
-                      response_two.get_data().decode('utf-8'),
-                      msg="Book cannot be added twice")
+        response_two = self.client.post(
+            '/api/v1/books', data=json.dumps(self.book),
+            headers={'content-type': 'application/json'})
+        # Test that the endpoint does not allow addition a book twice
+        self.assertIn(
+            'A book with that title already exist.',
+            str(response_two.data), msg="Book cannot be added twice")
 
         # delete the book after test
         self.client.delete('/api/v1/books/3')
@@ -80,14 +71,9 @@ class TestBooksEndpoints(unittest.TestCase):
     def test_get_all_books(self):
         """Test get all book route."""
         # Add a book
-        response = self.client.post('/api/v1/books',
-                                    data=json.dumps(self.book),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Book added successfully.', str(response.data),
-                      msg="Book added successfully")
+        response = self.client.post(
+            '/api/v1/books', data=json.dumps(self.book),
+            headers={'content-type': 'application/json'})
 
         # Test the book added is in all books
         response = self.client.get('/api/v1/books')
@@ -139,17 +125,13 @@ class TestBooksEndpoints(unittest.TestCase):
     def test_modify_book(self):
         """Test update book endpoint."""
         # Add the book to be updated
-
-        self.client.post('/api/v1/books',
-                         data=json.dumps(self.book),
+        self.client.post('/api/v1/books', data=json.dumps(self.book),
                          headers={'content-type': 'application/json'})
 
         # Update the books title and author
-        response = self.client.put('/api/v1/books/3',
-                                   data=json.dumps(self.book_one_update),
-                                   headers={
-                                       'content-type': 'application/json'
-                                   })
+        response = self.client.put(
+            '/api/v1/books/3', data=json.dumps(self.book_one_update),
+            headers={'content-type': 'application/json'})
         self.assertIn('Your update is successful.', str(response.data),
                       msg="Book updated successfully")
 
@@ -161,80 +143,95 @@ class TestBooksEndpoints(unittest.TestCase):
     def test_register_user(self):
         """Test if  register endpoint work as expected."""
         # Register a new user
-        response = self.client.post('/api/v1/auth/register',
-                                    data=json.dumps(self.user),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
+        response = self.client.post(
+            '/api/v1/auth/register', data=json.dumps(self.user),
+            headers={'content-type': 'application/json'})
         self.assertEqual(response.status_code, 200,
                          msg="Register new user successfully")
-
         # Register a user twice
-        response_two = self.client.post('/api/v1/auth/register',
-                                        data=json.dumps(self.user),
-                                        headers={
-                                            'content-type': 'application/json'
-                                        })
+        response_two = self.client.post(
+            '/api/v1/auth/register', data=json.dumps(self.user),
+            headers={'content-type': 'application/json'})
         self.assertIn('User already registered', str(response_two.data),
                       msg="Cant register one user twice")
 
     def test_login_user(self):
         """Test if  login endpoint work as expected."""
+        # Login a user not registered
+        response = self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_login_details),
+            headers={'content-type': 'application/json'})
+        self.assertIn('User with that email does not exist',
+                      str(response.data), msg="Login successful")
         # Add user to login
-        self.client.post('/api/v1/auth/register',
-                         data=json.dumps(self.user),
-                         headers={
-                             'content-type': 'application/json'
-                         })
+        self.client.post('/api/v1/auth/register', data=json.dumps(self.user),
+                         headers={'content-type': 'application/json'})
         # Login a user
-        response = self.client.post('/api/v1/auth/login',
-                                    data=json.dumps(self.user_login_details),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
+        response = self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_login_details),
+            headers={'content-type': 'application/json'})
         # Test if login was successful
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Successfuly login',
-                      response.get_data().decode('utf-8'),
+        self.assertIn('Successfuly login', str(response.data),
                       msg="Login successful")
 
     def test_logout_user(self):
-        """Test if  login endpoint work as expected."""
-        self.client.post('/api/v1/auth/login',
-                         data=json.dumps(self.user_login_details),
-                         headers={
-                             'content-type': 'application/json'
-                         })
+        # Login a user
+        self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_login_details),
+            headers={'content-type': 'application/json'})
         # Logout a user
-        response = self.client.post('/api/v1/auth/logout',
-                                    data=json.dumps(self.user_login_details),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
+        response = self.client.post(
+            '/api/v1/auth/logout', data=json.dumps(self.user_login_details),
+            headers={'content-type': 'application/json'})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Successfuly logged Out',
-                      response.get_data().decode('utf-8'),
-                      msg="Logout successful")
+        self.assertIn(
+            'Successfuly logged Out', response.get_data().decode('utf-8'),
+            msg="Logout successful")
 
     def test_password_reset(self):
         """Test for  password-reset endpoint."""
         # Reset password
-        response = self.client.post('/api/v1/auth/reset-password',
-                                    data=json.dumps(self.user_one_reset),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
-        self.assertIn('Reset successful', str(response.data),
-                      msg="Reset successful")
+        response = self.client.post(
+            '/api/v1/auth/reset-password', data=json.dumps(self.user_one_reset),
+            headers={'content-type': 'application/json'})
+        self.assertIn('Reset successful', str(response.data))
 
         # Login with new password
-        response = self.client.post('/api/v1/auth/login',
-                                    data=json.dumps(self.user_one_reset),
-                                    headers={
-                                        'content-type': 'application/json'
-                                    })
-        self.assertIn('Successfuly login', str(response.data),
-                      msg="Login with new password successful")
+        response = self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_one_reset),
+            headers={'content-type': 'application/json'})
+        self.assertIn('Successfuly login', str(response.data))
+
+    def test_borrow_book(self):
+        """Test for borrow book endpoint."""
+        # Try to borrow before login
+        response = self.client.post('/api/v1/users/books/1',
+                                    data=json.dumps(self.user_to_borrow_email),
+                                    headers={'content-type': 'application/json'})
+        self.assertIn('Login to borrow a book', str(response.data))
+
+        # Login with a user
+        response = self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_to_borrow),
+            headers={'content-type': 'application/json'})
+        self.assertIn('Successfuly login', str(response.data))
+
+        # Try to borrow after login
+        response = self.client.post('/api/v1/users/books/1',
+                                    data=json.dumps(self.user_to_borrow_email),
+                                    headers={'content-type': 'application/json'})
+        self.assertIn('"Book borrowed successfully"', str(response.data))
+
+        # Try to borrow twice
+        response = self.client.post('/api/v1/users/books/1',
+                                    data=json.dumps(self.user_to_borrow_email),
+                                    headers={'content-type': 'application/json'})
+        self.assertIn('The Book is already borrowed', str(response.data))
+
+    def tearDown(self):
+        """Return to normal state after test."""
+        self.app_context.pop()
 
 
 if __name__ == '__main__':
