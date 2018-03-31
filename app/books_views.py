@@ -6,13 +6,6 @@ from .models import Users, Books
 from .setup_data import BOOKS
 
 
-@app.route('/')
-@app.route('/api/v1')
-def hello():
-    """Introduction to app."""
-    return jsonify({'Message': 'WELCOME TO HELLO BOOKS'})
-
-
 @app.route('/api/v1/books', methods=['GET', 'POST'])
 def all_book_handler():
     """Handle viewing of all books and adding a book."""
@@ -30,30 +23,20 @@ def get_all_book():
 
 def add_book():
     """Add books."""
+    book_id = len(BOOKS) + 1
     # Get details of the book to be added
-    book_id = request.args.get('book_id')
-    title = request.args.get('title')
-    author = request.args.get('author')
-    description = request.args.get('description')
-    edition = request.args.get('edition')
-    pyear = request.args.get('pyear')
-    quantity = request.args.get('quantity')
+    title = request.json.get('title')
+    author = request.json.get('author')
+    description = request.json.get('description')
+    edition = request.json.get('edition')
+    pyear = request.json.get('pyear')
+    quantity = request.json.get('quantity')
 
-    if book_id in [None, ""]:
-        return jsonify(
-            {'Message': 'Fill in the book Id an example is {}'.format(
-                len(BOOKS) + 1)}
-        )
-    else:
-        book_id = int(book_id)
-
-    if book_id in [book.book_id for book in BOOKS]:
-        return jsonify({'Message': 'The book_Id exists choose another one.'})
     if title is None:
         return jsonify({'Message': 'Give your book a title.'})
     if author is None:
         return jsonify({'Message': 'Give the author of the book'})
-    if description is None and type(description) is int:
+    if description is None or type(description) is int:
         return jsonify({'Message': 'Give your book a short description'})
     if edition is None:
         return jsonify({'Message': 'What is the edition of this book?'})
@@ -67,8 +50,8 @@ def add_book():
     book_added = Books(book_id, title, author,
                        description, edition, pyear, quantity)
 
-    # check if the book exist.
-    if book_added in [book for book in BOOKS]:
+    # check if the book title exist.
+    if book_added.title in [book.title for book in BOOKS]:
         return jsonify({'Message': 'A book with that title already exist.'})
     else:
         BOOKS.append(book_added)
@@ -106,20 +89,16 @@ def modify_book(bookId):
         if book.book_id == bookId:
             break
     if book is None:
-        return 'No book with that Id.'
-    # get variable update
-    book_id = request.args.get('book_id')
-    title = request.args.get('title')
-    author = request.args.get('author')
-    description = request.args.get('description')
-    edition = request.args.get('edition')
-    pyear = request.args.get('pyear')
-    quantity = request.args.get('quantity')
+        return ({'Message': 'No book with that Id.'})
+    title = request.json.get('title')
+    author = request.json.get('author')
+    description = request.json.get('description')
+    edition = request.json.get('edition')
+    pyear = request.json.get('pyear')
+    quantity = request.json.get('quantity')
 
     # check if the variable is to be updated
     try:
-        if book_id:
-            return 'You cannot modify a Book Id'
         if title:
             book.title = title
         if author:
@@ -133,9 +112,9 @@ def modify_book(bookId):
         if quantity:
             book.quantity = quantity
     except:
-        pass
+        return jsonify({'Message': 'No update done.'})
 
-    return 'Your update is successful.'
+    return jsonify({'Message': 'Your update is successful.'})
 
 
 def delete_book(bookId):
