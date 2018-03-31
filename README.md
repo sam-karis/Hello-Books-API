@@ -1,4 +1,6 @@
 # Hello-Books-API
+[![Build Status](https://travis-ci.org/sam-karis/Hello-Books-API.svg?branch=master)](https://travis-ci.org/sam-karis/Hello-Books-API)  [![Maintainability](https://api.codeclimate.com/v1/badges/6a4b6e3805c74b78d14f/maintainability)](https://codeclimate.com/github/sam-karis/Hello-Books-API/maintainability) [![Coverage Status](https://coveralls.io/repos/github/sam-karis/Hello-Books-API/badge.svg?branch=master)](https://coveralls.io/github/sam-karis/Hello-Books-API?branch=master)
+
 Hello-Books-APi is a library management API. It help in management and tracking of books and users who interact with the library's books. The API also enable new users to register while existing users can login. Users can also reset their password and borrow books.
 The API functionality and the respective endpoints include the following:
 
