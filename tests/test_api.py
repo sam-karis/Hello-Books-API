@@ -193,7 +193,8 @@ class TestBooksEndpoints(unittest.TestCase):
         """Test for  password-reset endpoint."""
         # Reset password
         response = self.client.post(
-            '/api/v1/auth/reset-password', data=json.dumps(self.user_one_reset),
+            '/api/v1/auth/reset-password',
+            data=json.dumps(self.user_one_reset),
             headers={'content-type': 'application/json'})
         self.assertIn('Reset successful', str(response.data))
 
@@ -208,7 +209,9 @@ class TestBooksEndpoints(unittest.TestCase):
         # Try to borrow before login
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
-                                    headers={'content-type': 'application/json'})
+                                    headers={
+                                        'content-type': 'application/json'
+                                    })
         self.assertIn('Login to borrow a book', str(response.data))
 
         # Login with a user
@@ -220,13 +223,17 @@ class TestBooksEndpoints(unittest.TestCase):
         # Try to borrow after login
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
-                                    headers={'content-type': 'application/json'})
+                                    headers={
+                                        'content-type': 'application/json'
+                                    })
         self.assertIn('"Book borrowed successfully"', str(response.data))
 
         # Try to borrow twice
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
-                                    headers={'content-type': 'application/json'})
+                                    headers={
+                                        'content-type': 'application/json'
+                                    })
         self.assertIn('The Book is already borrowed', str(response.data))
 
     def tearDown(self):
