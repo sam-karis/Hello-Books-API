@@ -1,0 +1,189 @@
+FORMAT: 1A
+HOST: https://hello-books-api-v1.herokuapp.com/api/v1
+
+# hello-book-api
+
+Hello-Books-API is a simple api where it users can do the following:   
+- Register, Login, Logout, Reset password
+- View all Books and Add a book
+- Delete, Update, and View one Book
+
+## Register a user [/auth/register]
+#### To register [POST]
+
++ Request (application/json)
+
+        {
+            "name" : "Sam",
+            "email": "samkaris@andela.com",
+            "password": "secretpassword"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "Message": "User has successfully registered"
+        }
+
+## For registered users [/auth/login]
+#### To login [POST]
+
++ Request 200 (application/json)
+
+        {
+            "email": "samkaris@andela.com",
+            "password": "secretpassword"
+        }
+        
++ Response 200 (application/json)
+
+        {
+            "Message": "You are already logged In"
+        }
+
+## For logged in users [/auth/logout]
+#### To logout [POST]
+
++ Request 200 (application/json)
+
+        {
+            "email": "samkaris@andela.com"
+        }
+        
++ Response 200 (application/json)
+
+        {
+            "Message": "Successfuly logged Out"
+        }
+
+## In case you forgot password [/auth/reset-password]
+#### To Reset-password [POST]
+
++ Request 200 (application/json)
+
+        {
+            "email": "samkaris@andela.com",
+            "password" : "rem-password"
+        }
+        
++ Response 200 (application/json)
+
+        {
+            "Message": "Reset successful."
+        }
+        
+## Books [/books]
+
+#### View all books [GET]
+
++ Response 200 (application/json)
+
+        {
+            "books": [
+                {
+                    "author": "Rpeng",
+                    "book_id": 1,
+                    "description": "Intro to data science with python",
+                    "edition": "5th",
+                    "status": "Available",
+                    "title": "Data Science"
+                },
+                {
+                    "author": "Sam",
+                    "book_id": 2,
+                    "description": "Intermidiate to data science with SQL",
+                    "edition": "6th",
+                    "status": "Available",
+                    "title": "Data Mining"
+                }
+            ]
+        }
+        
+#### Add a book [POST]
+
+One can be able to add a book
+
++ Request 200 (application/json)
+
+        {
+        "title": "Python for Dummies",
+        "author": "Jack",
+        "description": "Basic syntax for python biginners",
+        "edition": "5TH"
+        }
+        
++ Response 200 (application/json)
+
+        {
+            "Message": "Book added successfully."
+        }
+        
+
+## Specific Book[/books/{bookId}]
+#### View a specific book [GET]
+
+User can be able to retrieve one book using id.
+
++ Request 200 (application/json)
+
++ Response 200 (application/json)
+
+        {
+            "author": "Rpeng",
+            "book_id": 1,
+            "description": "Intro to data science with python",
+            "edition": "5th",
+            "status": "Available",
+            "title": "Data Science"
+        }
+        
+### Edit a book [PUT]
+
+One can be able to edit a book by it's id
+
++ Request 200 (application/json)
+
+        {
+            "author": "Joan",
+            "title": "Soft skills"
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "Message": "Your update is successful."
+        }
+        
+### Delete a book [DELETE]
+
+One can be able to delete a book by it's id
+
++ Response 200 (application/json)
+
+        {
+            "Message": "Book deleted successfully"
+        }
+
+## User can borrow a borrow a book[/users/books/{bookId}]
+
+#### To borrow a book [POST]
+A logged in user should be a ble to borrow a book
+
++ Request 200 (application/json)
+
+        {
+            "email" : "samkaris@andela.com"
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "Message": "Book borrowed successfully",
+            "book_id": 1,
+            "book_title": "Data Science",
+            "return_date": "Mon, 09 Apr 2018 23:53:51 GMT",
+            "status": "Not returned",
+            "user_name": "Joan"
+        }
