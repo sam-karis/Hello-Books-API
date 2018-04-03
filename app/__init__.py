@@ -5,6 +5,7 @@ from config import app_config
 from flask import Flask
 app = Flask(__name__, instance_relative_config=True)
 app.secret_key = 'super secret key'
+app.url_map.strict_slashes = False
 
 
 def create_app(config_name):
