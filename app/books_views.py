@@ -1,8 +1,11 @@
 """Create Hello Books API endpoints."""
 import json
+
 from flask import jsonify, request
+
 from app import app
-from .models import Users, Books
+
+from .models import Books, Users
 from .setup_data import BOOKS
 
 
@@ -30,13 +33,13 @@ def add_book():
     description = request.json.get('description')
     edition = request.json.get('edition')
 
-    if title is None:
+    if title is None or title.strip() == "":
         return jsonify({'Message': 'Give your book a title.'})
-    if author is None:
+    if author is None or author.strip() == "":
         return jsonify({'Message': 'Give the author of the book'})
-    if description is None or type(description) is int:
+    if description is None or description.strip() == "" or type(description) is int:
         return jsonify({'Message': 'Give your book a short description'})
-    if edition is None:
+    if edition is None or edition.strip() == "":
         return jsonify({'Message': 'What is the edition of this book?'})
 
     book_added = Books(book_id, title, author, description, edition)
@@ -76,6 +79,7 @@ def get_book(bookId):
 def modify_book(bookId):
     """Update/modify a book by Id."""
     bookId = int(bookId)
+    response = "You update the following : "
     for book in BOOKS:
         if book.book_id == bookId:
             break
@@ -86,19 +90,20 @@ def modify_book(bookId):
     description = request.json.get('description')
     edition = request.json.get('edition')
 
+    book_before = book
+
     # check if the variable is to be updated
     try:
-        if title:
+        if title and title.strip() != "":
             book.title = title
-        if author:
+        if author and author.strip() != "":
             book.author = author
-        if description:
+        if description and description.strip() != "":
             book.description = description
-        if edition:
+        if edition and edition.strip() != "":
             book.edition = edition
     except:
-        return jsonify({'Message': 'No update done.'})
-
+        pass
     return jsonify({'Message': 'Your update is successful.'})
 
 

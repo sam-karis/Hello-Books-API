@@ -14,11 +14,11 @@ def register_user():
     email = request.json.get('email')
     password = request.json.get('password')
 
-    if not name:
+    if not name or name.strip() == "":
         return jsonify({'Message': 'Fill in  your name to register'})
-    if not email:
+    if not email or email.strip() == "":
         return jsonify({'Message': 'Fill in  your email to register'})
-    if not password:
+    if not password or password.strip() == "":
         return jsonify({'Message': 'Fill in  your password to register'})
 
     if email not in [user.email for user in USERS]:
@@ -36,7 +36,7 @@ def user_login():
     email = request.json.get('email')
     password = request.json.get('password')
 
-    if email is None or password is None:
+    if email is None or email.strip() == "" or password.strip() == "" or password is None:
         return jsonify({"Message": "Enter both your email and password"})
     if email in [user.email for user in USERS]:
         if session.get(email):
