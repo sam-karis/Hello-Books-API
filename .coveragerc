@@ -17,6 +17,8 @@ omit=
     *uuid.py
     *encodings/*
     *hmac.py
+    *config.py
+    *setup_data.py
     
 
 
