@@ -21,7 +21,11 @@ def all_book_handler():
 
 def get_all_book():
     """Return all books."""
-    return jsonify(books=[item.serialize for item in BOOKS])
+    response = [item.serialize for item in BOOKS]
+    if len(response) == 0:
+        response = {"Message": "No books in the library"}
+        return jsonify(response), 204
+    return jsonify(books=response), 200
 
 
 def add_book():
@@ -37,7 +41,7 @@ def add_book():
         return jsonify({'Message': 'Give your book a title.'})
     if author is None or author.strip() == "":
         return jsonify({'Message': 'Give the author of the book'})
-    if description is None or description.strip() == "" or type(description) is int:
+    if description is None or description.strip() == "":
         return jsonify({'Message': 'Give your book a short description'})
     if edition is None or edition.strip() == "":
         return jsonify({'Message': 'What is the edition of this book?'})
@@ -49,27 +53,30 @@ def add_book():
         return jsonify({'Message': 'A book with that title already exist.'})
     else:
         BOOKS.append(book_added)
-        return jsonify({'Message': 'Book added successfully.'})
+        return jsonify({'Message': 'Book added successfully.'}), 201
 
 
 @app.route('/api/v1/books/<bookId>', methods=['GET', 'PUT', 'DELETE'])
 def specific_book_handler(bookId):
     """Endpoint to interact with specific book."""
-    if request.method == 'GET':
+    try:
+        bookId = int(bookId)
+        if request.method == 'GET':
 
-        return get_book(bookId)
+            return get_book(bookId)
 
-    elif request.method == 'PUT':
+        elif request.method == 'PUT':
 
-        return modify_book(bookId)
+            return modify_book(bookId)
 
-    elif request.method == 'DELETE':
-        return delete_book(bookId)
+        elif request.method == 'DELETE':
+            return delete_book(bookId)
+    except ValueError:
+        return jsonify({'Message': 'Use a valid book Id'}), 404
 
 
 def get_book(bookId):
     """Get a book by Id."""
-    bookId = int(bookId)
     for book in BOOKS:
         if book.book_id == bookId:
             return jsonify(book.serialize)
@@ -78,19 +85,16 @@ def get_book(bookId):
 
 def modify_book(bookId):
     """Update/modify a book by Id."""
-    bookId = int(bookId)
-    response = "You update the following : "
     for book in BOOKS:
         if book.book_id == bookId:
+            book_to_update = book
             break
-    if book is None:
+    if book_to_update is None:
         return ({'Message': 'No book with that Id.'})
     title = request.json.get('title')
     author = request.json.get('author')
     description = request.json.get('description')
     edition = request.json.get('edition')
-
-    book_before = book
 
     # check if the variable is to be updated
     try:
@@ -109,16 +113,12 @@ def modify_book(bookId):
 
 def delete_book(bookId):
     """Remove a book by Id."""
-    if bookId in [None, ""] or not int(bookId):
-        return jsonify({'Message': 'Enter a valid book id'})
-    else:
-        bookId = int(bookId)
-        if bookId not in [book.book_id for book in BOOKS]:
-            return jsonify({'Message': 'No book with that Id to delete.'})
-        for book in BOOKS:
-            if book.book_id == bookId:
-                book_to_delete = book
-                break
-        if book_to_delete is not None:
-            BOOKS.remove(book)
-            return jsonify({'Message': "Book deleted successfully"})
+    if bookId not in [book.book_id for book in BOOKS]:
+        return jsonify({'Message': 'No book with that Id to delete.'})
+    for book in BOOKS:
+        if book.book_id == bookId:
+            book_to_delete = book
+            break
+    if book_to_delete is not None:
+        BOOKS.remove(book)
+        return jsonify({'Message': "Book deleted successfully"})

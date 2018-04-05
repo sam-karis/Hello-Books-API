@@ -36,8 +36,10 @@ def user_login():
     email = request.json.get('email')
     password = request.json.get('password')
 
-    if email is None or email.strip() == "" or password.strip() == "" or password is None:
-        return jsonify({"Message": "Enter both your email and password"})
+    if not email or email is None or email.strip() == "":
+        return jsonify({"Message": "Enter a valid email"})
+    if not password or password.strip() == "" or password is None:
+        return jsonify({"Message": "Enter a valid password"})
     if email in [user.email for user in USERS]:
         if session.get(email):
             response = jsonify({'Message': 'You are already logged In'})

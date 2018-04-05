@@ -51,7 +51,7 @@ class TestBooksEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/books', data=json.dumps(self.book),
             headers={'content-type': 'application/json'})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertIn(
             'Book added successfully.', response.get_data().decode('utf-8'),
             msg="Book added successfully")
@@ -239,6 +239,7 @@ class TestBooksEndpoints(unittest.TestCase):
     def tearDown(self):
         """Return to normal state after test."""
         self.app_context.pop()
+
 
 
 if __name__ == '__main__':
