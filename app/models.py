@@ -1,26 +1,41 @@
 """Hello Books models."""
+from app import db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
-class Person(object):
-    """Common class for admin and user."""
+class User(db.Model):
+    """This class is a representation of users table."""
+    __tablename__ = 'users'
+
+    user_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60))
+    email = db.Column(db.String(60), unique=True)
+    password_hash = db.Column(db.String(200))
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __init__(self, name, email, password):
         """Initialize the users class."""
         self.name = name
         self.email = email
-        self.password = password
+        self.password_hash = password_hash
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
-class Users(Person):
-    """Users model."""
+    def get_all(self):
+        return User.query.all()
 
-    def __init__(self, user_id, name, email, password):
-        """Initialize the users class."""
-        self.user_id = user_id
-        Person.__init__(self, name, email, password)
+    def __repr__(self):
+        return '<User: {}>'.format(self.email)
 
-    def hash_password(self, password):
+    @property
+    def password(self):
+        """Prevent the password from being accessed."""
+        raise AttributeError('Password nod accessible')
+
+    @password.setter
+    def password(self, password):
         """Hash password."""
         self.password = generate_password_hash(password)
 
@@ -28,49 +43,38 @@ class Users(Person):
         """Check password given is valid."""
         return check_password_hash(self.password, password)
 
-    @property
-    def serialize(self):
-        """Serialize user Id."""
-        return {
-            'user_id': self.user_id,
-            'name': self.name,
-            'email': self.email,
-            'password': self.password
-        }
 
+class Books(db.Model):
+    """This class is a representation of books table."""
+    __tablename__ = 'books'
 
-class Admin(Person):
-    """Admin model."""
-
-    def __init__(self, admin_id, name, email, password):
-        """Initialize the admin model."""
-        self.admin_id = admin_id
-        Person.__init__(self, name, email, password)
-
-    @property
-    def serialize(self):
-        """Serialize admin Id."""
-        return {
-            'admin_Id': self.admin_id,
-            'name': self.name,
-            'email': self.email,
-            'password': self.password
-        }
-
-
-class Books(object):
-    """books models."""
+    book_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(60), unique=True)
+    author = db.Column(db.String(60))
+    description = db.Column(db.String(200))
+    edition = db.Column(db.String(20))
+    status = db.Column(db.String(20), default="Available")
 
     def __init__(
-        self, book_id, title, author, description, edition, status="Available"
+        self, title, author, description, edition, status="Available"
     ):
         """Initialize the model."""
-        self.book_id = book_id
         self.title = title
         self.author = author
         self.description = description
         self.edition = edition
         self.status = status
+
+    def save_book(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_book(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Book: {}>'.format(self.book_id)
 
     @property
     def serialize(self):
@@ -81,29 +85,5 @@ class Books(object):
             'author': self.author,
             'description': self.description,
             'edition': self.edition,
-            'status': self.status
-        }
-
-
-class BookHistory(object):
-    """books model to record return and borrowing of a book."""
-
-    def __init__(self, book_id, book_title,
-                 user_name, return_date, status="Not returned"):
-        """Initialize the model."""
-        self.book_id = book_id
-        self.book_title = book_title
-        self.user_name = user_name
-        self.return_date = return_date
-        self.status = status
-
-    @property
-    def serialize(self):
-        """Serialize bookHistory."""
-        return {
-            "book_id": self.book_id,
-            'book_title': self.book_title,
-            'user_name': self.user_name,
-            'return_date': self.return_date,
             'status': self.status
         }
