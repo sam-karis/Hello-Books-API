@@ -12,7 +12,7 @@ class TestBooksEndpoints(unittest.TestCase):
     """Test books endpoints."""
 
     def setUp(self):
-        """SetUp endpoint tests."""
+        """First setup endpoint tests."""
         config_name = 'testing'
         app = create_app(config_name)
         self.app = app
@@ -239,13 +239,12 @@ class TestBooksEndpoints(unittest.TestCase):
         access_token = json.loads(response.get_data().decode('utf-8'))['token']
 
         # Try to borrow after login
-        response = self.client.post('/api/v1/users/books/1',
-                                    data=json.dumps(self.user_to_borrow_email),
-                                    headers={
-                                        'content-type': 'application/json',
-                                        'Authorization': 'Bearer {}'
-                                        .format(access_token)
-                                    })
+        response = self.client.post(
+            '/api/v1/users/books/1', data=json.dumps(
+                self.user_to_borrow_email),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(access_token)
+                     })
         self.assertIn('Book borrowed successfully', str(response.data))
 
         # Try to borrow twice
@@ -270,6 +269,15 @@ class TestBooksEndpoints(unittest.TestCase):
                                     })
         self.assertIn('Login to borrow a book', str(response.data))
 
+    def test_wrong_url(self):
+        """Test get all book route."""
+        # Try to get a book with wrong url
+        response = self.client.get(
+            '/api/v1/library', data=json.dumps(self.book),
+            headers={'content-type': 'application/json'})
+        
+        self.assertIn('You entered an invalid url', str(response.data))
+        
     def tearDown(self):
         """Return to normal state after test."""
         self.app_context.pop()
