@@ -8,6 +8,7 @@ from app import app
 from .models import Books, Users
 from .setup_data import BOOKS
 
+
 @app.errorhandler(404)
 def invalid_endpoint(error=None):
     """Handle wrong endpoints."""
@@ -20,6 +21,7 @@ def invalid_endpoint(error=None):
     response.status_code = 404
 
     return response
+
 
 @app.route('/api/v1/books', methods=['GET', 'POST'])
 def all_book_handler():
@@ -49,17 +51,17 @@ def add_book():
     description = request.json.get('description')
     edition = request.json.get('edition')
 
-    if title is None or title.strip() == "":
-        return jsonify({'Message': 'Give your book a title.'})
-    if author is None or author.strip() == "":
-        return jsonify({'Message': 'Give the author of the book'})
-    if description is None or description.strip() == "":
-        return jsonify({'Message': 'Give your book a short description'})
-    if edition is None or edition.strip() == "":
-        return jsonify({'Message': 'What is the edition of this book?'})
-
+    def validate_book_details(book_element):
+        """Check if book details entered are valid."""
+        if book_element is None or book_element.strip() == "":
+            return jsonify(
+                {'Message': 'Give your book a {}.'.format(book_element)}
+            )
+    validate_book_details(title)
+    validate_book_details(author)
+    validate_book_details(description)
+    validate_book_details(edition)
     book_added = Books(book_id, title, author, description, edition)
-
     # check if the book title exist.
     if book_added.title in [book.title for book in BOOKS]:
         return jsonify({'Message': 'A book with that title already exist.'})
@@ -110,15 +112,15 @@ def modify_book(bookId):
             if title in [book.title for book in BOOKS]:
                 return jsonify({'Message': 'Book with that title exists.'})
             book.title = title
-        author = request.json.get('author')
-        if author and author.strip() != "":
-            book.author = author
-        description = request.json.get('description')
-        if description and description.strip() != "":
-            book.description = description
-        edition = request.json.get('edition')
-        if edition and edition.strip() != "":
-            book.edition = edition
+
+        def validate_update(element_to_update):
+            """Validate element before update."""
+            element_to_update = request.json.get(element_to_update)
+            if element_to_update and element_to_update.strip() != "":
+                book.element_to_update = element_to_update
+        validate_update('author')
+        validate_update('description')
+        validate_update('edition')
     except AttributeError:
         pass
     return jsonify({'Message': 'Your update is successful.'})
