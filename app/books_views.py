@@ -8,6 +8,18 @@ from app import app
 from .models import Books, Users
 from .setup_data import BOOKS
 
+@app.errorhandler(404)
+def invalid_endpoint(error=None):
+    """Handle wrong endpoints."""
+    message = {
+        'message': 'You entered an invalid url',
+        'URL': 'Not found ' + request.url,
+        'status': 404
+    }
+    response = jsonify(message)
+    response.status_code = 404
+
+    return response
 
 @app.route('/api/v1/books', methods=['GET', 'POST'])
 def all_book_handler():
@@ -85,28 +97,29 @@ def get_book(bookId):
 
 def modify_book(bookId):
     """Update/modify a book by Id."""
+    book_to_update = None
     for book in BOOKS:
         if book.book_id == bookId:
             book_to_update = book
             break
     if book_to_update is None:
         return ({'Message': 'No book with that Id.'})
-    title = request.json.get('title')
-    author = request.json.get('author')
-    description = request.json.get('description')
-    edition = request.json.get('edition')
-
-    # check if the variable is to be updated
     try:
+        title = request.json.get('title')
         if title and title.strip() != "":
+            if title in [book.title for book in BOOKS]:
+                return jsonify({'Message': 'Book with that title exists.'})
             book.title = title
+        author = request.json.get('author')
         if author and author.strip() != "":
             book.author = author
+        description = request.json.get('description')
         if description and description.strip() != "":
             book.description = description
+        edition = request.json.get('edition')
         if edition and edition.strip() != "":
             book.edition = edition
-    except:
+    except AttributeError:
         pass
     return jsonify({'Message': 'Your update is successful.'})
 
