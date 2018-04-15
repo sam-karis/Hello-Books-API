@@ -46,6 +46,9 @@ class TestBooksEndpoints(unittest.TestCase):
         self.user_one_reset = {"email": "jack@andela.com",
                                "password": "uniquepass"}
 
+        self.user_whitespace_reset = {"email": "jack@andela.com",
+                                      "password": "   "}
+
     def test_add_book(self):
         """Test add a book endpoint."""
         # Add a new book
@@ -221,6 +224,15 @@ class TestBooksEndpoints(unittest.TestCase):
             headers={'content-type': 'application/json'})
         self.assertIn('Successfuly login', str(response.data))
 
+    def test_whitespace_reset(self):
+        """Test for  password-reset endpoint."""
+        # Reset password to a white space
+        response = self.client.post(
+            '/api/v1/auth/reset-password',
+            data=json.dumps(self.user_whitespace_reset),
+            headers={'content-type': 'application/json'})
+        self.assertIn('Enter your valid new password', str(response.data))
+
     def test_borrow_book(self):
         """Test for borrow book endpoint."""
         # Try to borrow without a token
@@ -275,9 +287,9 @@ class TestBooksEndpoints(unittest.TestCase):
         response = self.client.get(
             '/api/v1/library', data=json.dumps(self.book),
             headers={'content-type': 'application/json'})
-        
+
         self.assertIn('You entered an invalid url', str(response.data))
-        
+
     def tearDown(self):
         """Return to normal state after test."""
         self.app_context.pop()

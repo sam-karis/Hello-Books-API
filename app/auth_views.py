@@ -93,6 +93,7 @@ def password_reset():
     password = request.json.get('password')
     if email is None:
         return jsonify({'Message': 'Enter your email and the new password'})
+    updated_user = None
     for user in USERS:
         if user.email == email:
             updated_user = user
@@ -101,9 +102,10 @@ def password_reset():
     if updated_user is None:
         return jsonify({'Message': 'User does not exist'})
     else:
-        if password in ["", None]:
-            jsonify({'Message': 'Enter your new password'})
+        if password in ["", None] or password.strip() == "":
+            response = jsonify({'Message': 'Enter your valid new password'})
         else:
             updated_user.hash_password(password)
             USERS.append(updated_user)
-            return jsonify({'Message': 'Reset successful.'})
+            response = jsonify({'Message': 'Reset successful.'})
+        return response
