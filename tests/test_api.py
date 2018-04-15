@@ -12,7 +12,7 @@ class TestBooksEndpoints(unittest.TestCase):
     """Test books endpoints."""
 
     def setUp(self):
-        """SetUp test."""
+        """SetUp endpoint tests."""
         config_name = 'testing'
         app = create_app(config_name)
         self.app = app
@@ -40,6 +40,7 @@ class TestBooksEndpoints(unittest.TestCase):
         self.user_to_borrow = {"email": "john@andela.com",
                                "password": "hardpassword"}
         self.user_to_borrow_email = {"email": "john@andela.com"}
+        self.user_to_borrow_email_one = {"email": "sam@andela.com"}
 
         # User new password
         self.user_one_reset = {"email": "jack@andela.com",
@@ -170,20 +171,36 @@ class TestBooksEndpoints(unittest.TestCase):
         response = self.client.post(
             '/api/v1/auth/login', data=json.dumps(self.user_login_details),
             headers={'content-type': 'application/json'})
+        access_token = json.loads(response.get_data().decode('utf-8'))['token']
+
         # Test if login was successful
         self.assertEqual(response.status_code, 200)
         self.assertIn('Successfuly login', str(response.data),
                       msg="Login successful")
-
-    def test_logout_user(self):
-        # Login a user
-        self.client.post(
-            '/api/v1/auth/login', data=json.dumps(self.user_login_details),
-            headers={'content-type': 'application/json'})
         # Logout a user
         response = self.client.post(
             '/api/v1/auth/logout', data=json.dumps(self.user_login_details),
+            headers={
+                'content-type': 'application/json',
+                'Authorization': 'Bearer {}'
+                .format(access_token)
+            })
+
+    def test_logout_user(self):
+        """Login a user."""
+        response = self.client.post(
+            '/api/v1/auth/login', data=json.dumps(self.user_login_details),
             headers={'content-type': 'application/json'})
+
+        access_token = json.loads(response.get_data().decode('utf-8'))['token']
+        # Logout a user
+        response = self.client.post(
+            '/api/v1/auth/logout', data=json.dumps(self.user_login_details),
+            headers={
+                'content-type': 'application/json',
+                'Authorization': 'Bearer {}'
+                .format(access_token)
+            })
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             'Successfuly logged Out', response.get_data().decode('utf-8'),
@@ -206,40 +223,56 @@ class TestBooksEndpoints(unittest.TestCase):
 
     def test_borrow_book(self):
         """Test for borrow book endpoint."""
-        # Try to borrow before login
+        # Try to borrow without a token
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
                                     headers={
                                         'content-type': 'application/json'
                                     })
-        self.assertIn('Login to borrow a book', str(response.data))
+        self.assertIn('Missing Authorization Header', str(response.data))
 
         # Login with a user
         response = self.client.post(
             '/api/v1/auth/login', data=json.dumps(self.user_to_borrow),
             headers={'content-type': 'application/json'})
         self.assertIn('Successfuly login', str(response.data))
+        access_token = json.loads(response.get_data().decode('utf-8'))['token']
 
         # Try to borrow after login
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
                                     headers={
-                                        'content-type': 'application/json'
+                                        'content-type': 'application/json',
+                                        'Authorization': 'Bearer {}'
+                                        .format(access_token)
                                     })
-        self.assertIn('"Book borrowed successfully"', str(response.data))
+        self.assertIn('Book borrowed successfully', str(response.data))
 
         # Try to borrow twice
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(self.user_to_borrow_email),
                                     headers={
-                                        'content-type': 'application/json'
+                                        'content-type': 'application/json',
+                                        'Authorization': 'Bearer {}'
+                                        .format(access_token)
                                     })
         self.assertIn('The Book is already borrowed', str(response.data))
+
+        # Try to borrow with a different email to that token was issued
+        response = self.client.post('/api/v1/users/books/1',
+                                    data=json.dumps(
+                                        self.user_to_borrow_email_one
+                                    ),
+                                    headers={
+                                        'content-type': 'application/json',
+                                        'Authorization': 'Bearer {}'
+                                        .format(access_token)
+                                    })
+        self.assertIn('Login to borrow a book', str(response.data))
 
     def tearDown(self):
         """Return to normal state after test."""
         self.app_context.pop()
-
 
 
 if __name__ == '__main__':

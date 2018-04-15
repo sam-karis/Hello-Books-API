@@ -1,11 +1,15 @@
 """Create the app."""
 # local import
 from config import app_config
+from flask_jwt_extended import JWTManager
 
 from flask import Flask
 app = Flask(__name__, instance_relative_config=True)
 app.secret_key = 'super secret key'
 app.url_map.strict_slashes = False
+app.config['JWT_SECRET_KEY'] = 'jwt-token-secret-key'
+
+jwt = JWTManager(app)
 
 
 def create_app(config_name):
