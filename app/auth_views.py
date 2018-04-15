@@ -1,9 +1,14 @@
 """Create Hello Books API endpoints."""
 import json
-from flask import jsonify, request, session
+from flask import jsonify, request
+from flask_jwt_extended import (create_access_token, jwt_required,
+                                get_jwt_identity, get_raw_jwt)
 from app import app
 from app.models import Users
 from app.setup_data import USERS
+
+blacklist = set()
+users_logged_in = set()
 
 
 @app.route('/api/v1/auth/register', methods=['POST'])
@@ -41,15 +46,17 @@ def user_login():
     if not password or password.strip() == "" or password is None:
         return jsonify({"Message": "Enter a valid password"})
     if email in [user.email for user in USERS]:
-        if session.get(email):
+        if email in users_logged_in:
             response = jsonify({'Message': 'You are already logged In'})
         else:
             for user in USERS:
                 if user.email == email:
                     break
             if user.check_password(password):
-                session[email] = True
-                response = jsonify({'Message': 'Successfuly login'}), 200
+                users_logged_in.add(email)
+                access_token = create_access_token(identity=email)
+                response = jsonify({'Message': 'Successfuly login',
+                                    "token": access_token}), 200
 
             else:
                 response = jsonify({'Messsage': 'Invalid email or password'})
@@ -58,6 +65,7 @@ def user_login():
 
 
 @app.route('/api/v1/auth/logout', methods=['POST'])
+@jwt_required
 def user_logout():
     """Endpoint for user to logout."""
     email = request.json.get('email')
@@ -66,8 +74,11 @@ def user_logout():
             "Message": "Enter the email of the user you want to logout."
         })
     else:
-        if session.get(email):
-            session[email] = False
+        jti = get_raw_jwt()['jti']
+        logged_user = get_jwt_identity()
+        if logged_user == email and jti not in blacklist:
+            blacklist.add(jti)
+            users_logged_in.remove(email)
             response = jsonify({'Message': 'Successfuly logged Out'})
         else:
             response = jsonify({'Message': 'User of {} is not logged In'
