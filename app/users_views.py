@@ -13,15 +13,18 @@ from .setup_data import BOOKS, USERS, BOOKHISTORY
 @jwt_required
 def borrow(bookId):
     """Endpoint for borrowing a book."""
-    bookId = int(bookId)
+    try:
+        bookId = int(bookId)
+    except ValueError:
+        return jsonify({"Message": "Use a valid books Id"})
     email = request.json.get('email')
     return_date = datetime.now() + timedelta(days=7)
     if email is None:
-        return jsonify({"Message": "Enter your email to borrow a book"})
+        response = jsonify({"Message": "Enter your email to borrow a book"})
     else:
         logged_user = get_jwt_identity()
         if logged_user != email:
-            return jsonify({"Message": "Login to borrow a book"})
+            response = jsonify({"Message": "Login to borrow a book"})
         else:
             if bookId not in [book.book_id for book in BOOKS]:
                 response = jsonify({"Message": "No book with that Id."})
@@ -45,4 +48,4 @@ def borrow(bookId):
                     {**{"Message": "Book borrowed successfully"},
                      **book_borrowed.serialize}
                 )
-            return response
+    return response

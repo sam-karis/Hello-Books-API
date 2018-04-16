@@ -269,6 +269,16 @@ class TestBooksEndpoints(unittest.TestCase):
                                     })
         self.assertIn('The Book is already borrowed', str(response.data))
 
+        # Try to borrow a book with invalid id
+        response = self.client.post('/api/v1/users/books/1ewdfv',
+                                    data=json.dumps(self.user_to_borrow_email),
+                                    headers={
+                                        'content-type': 'application/json',
+                                        'Authorization': 'Bearer {}'
+                                        .format(access_token)
+                                    })
+        self.assertIn('Use a valid books Id', str(response.data))
+
         # Try to borrow with a different email to that token was issued
         response = self.client.post('/api/v1/users/books/1',
                                     data=json.dumps(
