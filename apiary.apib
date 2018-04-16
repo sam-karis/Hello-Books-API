@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://hello-books-api-v1.herokuapp.com/api/v1
+HOST: https://hello-book-api-v1.herokuapp.com/api/v1
 
 # hello-book-api
 
@@ -38,11 +38,13 @@ Hello-Books-API is a simple api where it users can do the following:
 + Response 200 (application/json)
 
         {
-            "Message": "Successfuly login"
+          "Message": "Successfuly login",
+          "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MjM4OTg3MDMsIm5iZiI6MTUyMzg5ODcwMywianRpIjoiMjlmNjNhNDktMTI4NS00MGQzLWE4MTYtNjdmMTdlM2I0ZTVjIiwiZXhwIjoxNTIzODk5NjAzLCJpZGVudGl0eSI6InNhbWthcmlzQGFuZGVsYS5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.A5vN2J8BsOYwwMjVhZVs_BspTi9sP_h2ohH0I2CvzxI"
         }
 
 ## For logged in users [/auth/logout]
 #### To logout [POST]
+You cannot logout without providing token provided during login and email
 
 + Request 200 (application/json)
 
@@ -53,7 +55,7 @@ Hello-Books-API is a simple api where it users can do the following:
 + Response 200 (application/json)
 
         {
-            "Message": "Successfuly logged Out"
+          "msg": "Missing Authorization Header"
         }
 
 ## In case you forgot password [/auth/reset-password]
