@@ -14,13 +14,10 @@ def invalid_endpoint(error=None):
     """Handle wrong endpoints."""
     message = {
         'message': 'You entered an invalid url',
-        'URL': 'Not found ' + request.url,
-        'status': 404
+        'URL': 'Not found : ' + request.url
     }
-    response = jsonify(message)
-    response.status_code = 404
 
-    return response
+    return jsonify(message), 404
 
 
 @app.route('/api/v1/books', methods=['GET', 'POST'])
