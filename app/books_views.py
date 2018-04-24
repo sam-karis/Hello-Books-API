@@ -1,15 +1,15 @@
 """Create Hello Books API endpoints."""
 import json
+import os
 
 from flask import jsonify, request
 
 from app import app
 
-from .models import Books, Users
-from .setup_data import BOOKS
+from app.models import Books
 
 
-@app.route('/api/v1/books', methods=['GET', 'POST'])
+@app.route('/api/v2/books', methods=['GET', 'POST'])
 def all_book_handler():
     """Handle viewing of all books and adding a book."""
     if request.method == 'GET':
@@ -21,12 +21,14 @@ def all_book_handler():
 
 def get_all_book():
     """Return all books."""
+    BOOKS = Books.query.all()
     return jsonify(books=[item.serialize for item in BOOKS])
 
 
 def add_book():
     """Add books."""
-    book_id = len(BOOKS) + 1
+    BOOKS = Books.query.all()
+
     # Get details of the book to be added
     title = request.json.get('title')
     author = request.json.get('author')
@@ -42,69 +44,59 @@ def add_book():
     if edition is None or edition.strip() == "":
         return jsonify({'Message': 'What is the edition of this book?'})
 
-    book_added = Books(book_id, title, author, description, edition)
+    book_added = Books(title=title,
+                       author=author,
+                       description=description,
+                       edition=edition)
 
     # check if the book title exist.
     if book_added.title in [book.title for book in BOOKS]:
         return jsonify({'Message': 'A book with that title already exist.'})
     else:
-        BOOKS.append(book_added)
+        book_added.save_book()
         return jsonify({'Message': 'Book added successfully.'})
 
 
-@app.route('/api/v1/books/<bookId>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/api/v2/books/<int:bookId>', methods=['GET', 'PUT', 'DELETE'])
 def specific_book_handler(bookId):
     """Endpoint to interact with specific book."""
-    if request.method == 'GET':
 
-        return get_book(bookId)
+    """Get book with that id from db."""
+    book = Books.query.filter_by(book_id=bookId).first()
+
+    """Check if such a book exist in db."""
+    if not book:
+        return jsonify({'Message': 'No book with that Id.'})
+
+    elif request.method == 'GET':
+        """Get a book by Id."""
+        return jsonify(book.serialize)
 
     elif request.method == 'PUT':
+        """Update/modify a book by Id."""
+        title = str(request.json.get('title', ''))
+        author = str(request.json.get('author', ''))
+        description = str(request.json.get('description', ''))
+        edition = str(request.json.get('edition', ''))
 
-        return modify_book(bookId)
+        # check if the variable is to be updated
+        try:
+            if title and title.strip() != "":
+                book.title = title
+            if author and author.strip() != "":
+                book.author = author
+            if description and description.strip() != "":
+                book.description = description
+            if edition and edition.strip() != "":
+                book.edition = edition
+        except:
+            pass
+        book.save_book()
+        return jsonify({'Message': 'Your update is successful.'})
 
     elif request.method == 'DELETE':
-        return delete_book(bookId)
-
-
-def get_book(bookId):
-    """Get a book by Id."""
-    bookId = int(bookId)
-    for book in BOOKS:
-        if book.book_id == bookId:
-            return jsonify(book.serialize)
-    return jsonify({'Message': 'No book with that Id.'})
-
-
-def modify_book(bookId):
-    """Update/modify a book by Id."""
-    bookId = int(bookId)
-    response = "You update the following : "
-    for book in BOOKS:
-        if book.book_id == bookId:
-            break
-    if book is None:
-        return ({'Message': 'No book with that Id.'})
-    title = request.json.get('title')
-    author = request.json.get('author')
-    description = request.json.get('description')
-    edition = request.json.get('edition')
-
-    book_before = book
-
-    # check if the variable is to be updated
-    try:
-        if title and title.strip() != "":
-            book.title = title
-        if author and author.strip() != "":
-            book.author = author
-        if description and description.strip() != "":
-            book.description = description
-        if edition and edition.strip() != "":
-            book.edition = edition
-    except:
-        pass
-    return jsonify({'Message': 'Your update is successful.'})
+        book.delete_book()
+        return jsonify({'Message': "Book deleted successfully"})
 
 
 def delete_book(bookId):
