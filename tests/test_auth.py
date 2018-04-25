@@ -68,7 +68,8 @@ class TestAuthEndpoints(unittest.TestCase):
             '/api/v2/auth/register', data=json.dumps(self.admin),
             headers={'content-type': 'application/json'})
         self.assertEqual(response.status_code, 201)
-        self.assertIn('Successfully registered as an Admin', str(response.data),
+        self.assertIn('Successfully registered as an Admin',
+                      str(response.data),
                       msg="Register new Admin successfully")
 
         # Register an admin twice
@@ -107,7 +108,8 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # Login a user without password
         response = self.client.post(
-            '/api/v2/auth/login', data=json.dumps({"email": "jack@andela.com"}),
+            '/api/v2/auth/login', data=json.dumps(
+                {"email": "jack@andela.com"}),
             headers={'content-type': 'application/json'})
         # Test if login was successful with right credentials
         self.assertIn('Enter a valid password', str(response.data),
