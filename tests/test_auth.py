@@ -127,7 +127,8 @@ class TestAuthEndpoints(unittest.TestCase):
                          msg="Access token not issued")
 
     def test_logout_user(self):
-        # Register a user to login
+        """Test if  logout endpoint work as expected."""
+        # Register a user
         self.client.post('/api/v2/auth/register', data=json.dumps(self.user),
                          headers={'content-type': 'application/json'})
         # Login a user
