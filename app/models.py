@@ -50,7 +50,7 @@ class Books(db.Model):
     def __init__(
         self, title, author, description, edition, status="Available"
     ):
-        """Initialize the model."""
+        """Initialize the books class."""
         self.title = title
         self.author = author
         self.description = description
