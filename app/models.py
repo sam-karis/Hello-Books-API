@@ -95,14 +95,18 @@ class BookHistory(db.Model):
     title = db.Column(db.String(60))
     user_name = db.Column(db.String(60))
     return_date = db.Column(db.DateTime)
-    status = db.Column(db.String(20), default="Not returned")
+    returned = db.Column(db.Boolean, default=False)
 
     def get_user_history(email):
         return BookHistory.query.filter_by(user_email=email).all()
 
+    def get_books_not_returned(email):
+        return BookHistory.query.filter_by(
+            user_email=email, returned=False).all()
+
     def get_book_by_id(book_id):
         return BookHistory.query.filter_by(
-            book_id=book_id, status='Not returned').first()
+            book_id=book_id, returned=False).first()
 
     def save_book(self):
         db.session.add(self)
@@ -118,7 +122,7 @@ class BookHistory(db.Model):
             'book_title': self.title,
             'user_name': self.user_name,
             'return_date': self.return_date,
-            'status': self.status
+            'returned': self.returned
         }
 
 

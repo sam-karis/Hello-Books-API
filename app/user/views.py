@@ -10,20 +10,27 @@ from app.models import BookHistory, Books, RevokedTokens, User
 from . import user
 
 
-@user.route('/api/v2/users/books', methods=['POST'])
+@user.route('/api/v2/users/books', methods=['GET'])
 @jwt_required
 def get_user_borrow_history():
-    email = request.json.get('email')
-    if email is None:
-        response = jsonify({"Message": "Enter your email to continue"})
-    else:
-        jti = get_raw_jwt()['jti']
-        logged_user = get_jwt_identity()
-        if logged_user != email or RevokedTokens.is_jti_blacklisted(jti):
+    email = get_jwt_identity()
+    jti = get_raw_jwt()['jti']
+    returned = request.args.get('returned')
+    if returned and returned == "false":
+        books_not_returned = BookHistory.get_books_not_returned(email)
+        if not books_not_returned:
             response = jsonify(
-                {"Message": "Login to get a valid token to get your history"})
+                {"Message": "You do not have a book that is not returned."})
         else:
-            books_borrowed = BookHistory.get_user_history(email)
+            response = jsonify(
+                books=[book.serialize for book in books_not_returned]
+            )
+    else:
+        books_borrowed = BookHistory.get_user_history(email)
+        if not books_borrowed:
+            response = jsonify(
+                {"Message": "You do not have a borrowing history."})
+        else:
             response = jsonify(
                 books=[book.serialize for book in books_borrowed]
             )
@@ -39,7 +46,7 @@ def borrow(bookId):
     except ValueError:
         return jsonify({"Message": "Use a valid books Id"})
     email = request.json.get('email')
-    if email is None:
+    if not email or email.strip() == "":
         response = jsonify({"Message": "Enter your email to continue"})
     else:
         jti = get_raw_jwt()['jti']
@@ -71,7 +78,7 @@ def borrow(bookId):
                     response = jsonify(
                         {**{"Message": "Book borrowed successfully"},
                          **book_borrowed.serialize})
-                         
+
                 elif request.method == "PUT":
                     book_returned = BookHistory.get_book_by_id(bookId)
                     if book.status == "Available":
@@ -81,7 +88,7 @@ def borrow(bookId):
                     book.status = "Available"
                     book.save_book()
                     # Set book status & return date in BookHistory db.
-                    book_returned.status = "Returned"
+                    book_returned.returned = True
                     book_returned.return_date = datetime.now()
                     book_returned.save_book()
                     response = jsonify(
