@@ -28,11 +28,11 @@ def register_user():
     if not User.get_user_by_email(email):
         new_user = User(name=name, email=email)
         new_user.hash_password(password)
-        if is_admin or is_admin.lower() == 'true':
+        if is_admin:
             new_user.is_admin = True
             new_user.save()
             response = jsonify(
-                {'Message': 'Successfully registered as a Admin'}), 201
+                {'Message': 'Successfully registered as an Admin'}), 201
         else:
             new_user.save()
             response = jsonify(
@@ -52,8 +52,10 @@ def user_login():
         return jsonify({"Message": "Enter a valid email"})
     if not password or password.strip() == "" or password is None:
         return jsonify({"Message": "Enter a valid password"})
+    user = User.get_user_by_email(email)
     logged_in_user = ActiveTokens.find_user_with_token(email)
-    if logged_in_user and not logged_in_user.is_expired():
+    if logged_in_user and not logged_in_user.is_expired() \
+            and user.check_password(password):
         response = jsonify({'Message': 'You are already logged In',
                             "access_token": logged_in_user.access_token})
     elif logged_in_user and logged_in_user.is_expired():
@@ -61,15 +63,14 @@ def user_login():
         logged_in_user.access_token = access_token
         logged_in_user.save_token()
         response = jsonify({'Message': 'Your token expired use token below.',
-                            'token': access_token}), 200
+                            'access_token': access_token}), 200
     else:
         # Get the user from db using the mail
-        user = User.get_user_by_email(email)
         if user and user.check_password(password):
             access_token = create_access_token(identity=email)
             ActiveTokens(email, access_token).save_token()
             response = jsonify({'Message': 'Successfuly login',
-                                'token': access_token}), 200
+                                'access_token': access_token}), 200
         else:
             response = jsonify({'Messsage': 'Invalid email or password'}), 401
     return response
@@ -109,14 +110,15 @@ def password_reset():
     # Check if there is a user to with the email in db.
     updated_user = User.get_user_by_email(email)
     if not updated_user:
-        return jsonify({'Message': 'No user registered with {} as their email'
-                        .format(email)})
+        res = jsonify({'Message': 'No user registered with {} as their email'
+                       .format(email)})
     else:
         if not password or password.strip() == "":
-            return jsonify({'Message': 'Enter your new password'})
+            res = jsonify({'Message': 'Enter your new password'})
         elif updated_user.check_password(password):
-            return jsonify({'Message': 'Current password used thus no reset.'})
+            res = jsonify({'Message': 'Current password used thus no reset.'})
         else:
             updated_user.hash_password(password)
             updated_user.save()
-            return jsonify({'Message': 'Reset successful.'})
+            res = jsonify({'Message': 'Reset successful.'})
+    return res

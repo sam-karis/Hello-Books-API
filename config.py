@@ -4,7 +4,7 @@ import os
 
 class Config(object):
     """Common configuration Setting."""
-
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:mypass_bootcamp@localhost:5432/hello_books"
     DEBUG = False
     TESTING = False
 
@@ -17,7 +17,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     """Configuration setting at testing stage."""
-
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:mypass_bootcamp@localhost:5432/test_hello_books"
     TESTING = True
 
 

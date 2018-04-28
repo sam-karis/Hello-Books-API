@@ -15,9 +15,9 @@ def verify_admin_and_token():
     logged_user_email = get_jwt_identity()
     logged_user = User.get_user_by_email(logged_user_email)
     if RevokedTokens.is_jti_blacklisted(jti):
-        return jsonify({'Message': 'The token has been blacklisted.'})
+        return jsonify({'Message': 'The token has been blacklisted.'}), 401
     if not logged_user.is_admin:
-        return jsonify({'Message': 'Need to be an admin add a continue.'})
+        return jsonify({'Message': 'Need to be an admin add a continue.'}), 401
 
 
 @admin.route('/api/v2/books', methods=['POST'])
@@ -53,7 +53,7 @@ def add_book():
         return jsonify({'Message': 'A book with that title already exist.'})
     else:
         book_added.save_book()
-        return jsonify({'Message': 'Book added successfully.'})
+        return jsonify({'Message': 'Book added successfully.'}), 201
 
 
 @admin.route('/api/v2/books/<bookId>', methods=['PUT', 'DELETE'])
