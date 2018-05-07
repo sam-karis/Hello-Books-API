@@ -24,9 +24,6 @@ class User(db.Model):
     def get_user_by_email(email):
         return User.query.filter_by(email=email).first()
 
-    def __repr__(self):
-        return '<User: {}>'.format(self.email)
-
     def hash_password(self, password):
         """Hash password."""
         self.password_hash = generate_password_hash(password)
@@ -47,16 +44,6 @@ class Books(db.Model):
     edition = db.Column(db.String(20))
     status = db.Column(db.String(20), default="Available")
 
-    def __init__(
-        self, title, author, description, edition, status="Available"
-    ):
-        """Initialize the books class."""
-        self.title = title
-        self.author = author
-        self.description = description
-        self.edition = edition
-        self.status = status
-
     def save_book(self):
         db.session.add(self)
         db.session.commit()
@@ -67,9 +54,6 @@ class Books(db.Model):
 
     def get_book_by_id(book_id):
         return Books.query.filter_by(book_id=book_id).first()
-
-    def __repr__(self):
-        return '<Book: {}>'.format(self.book_id)
 
     @property
     def serialize(self):
