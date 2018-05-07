@@ -104,8 +104,15 @@ class TestBookEndpoints(unittest.TestCase):
         """Test if api handles wrong url."""
         # Try to get a book from wrong url
         response = self.client.get('/api/v2/booooks')
-        self.assertIn("You entered an invalid url", str(response.data),
-                      msg="Handles invalid url")
+        self.assertIn("http://localhost/api/v2/booooks is not a valid url",
+                      str(response.data), msg="Handles invalid url")
+
+    def test_wrong_request_method(self):
+        """Test if api handles wrong url."""
+        # Try to use a wrong request method on valid endpoint
+        response = self.client.delete('/api/v2/books')
+        self.assertIn("The DELETE method is not allowed for this endpoint",
+                      str(response.data), msg="Handles wrong request method")
 
     def tearDown(self):
         """Return to normal state after test."""
