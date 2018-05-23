@@ -39,11 +39,17 @@ def create_app(config_name):
         }), 404
 
     @app.errorhandler(405)
-    def invalid_endpoint(error=None):
+    def wrong_request_method(error=None):
         """Handle wrong methods for an endpoints."""
         request_method = request.method
         return jsonify({
             'message': 'The {} method is not allowed for this endpoint'
             .format(request_method)}), 405
+
+    @app.errorhandler(400)
+    def wrong_request(error=None):
+        """Handle wrong requests(not json format) for an endpoints."""
+        return jsonify({
+            'message': 'The endpoint support JSON requests only.'}), 400
 
     return app
