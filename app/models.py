@@ -8,11 +8,14 @@ class User(db.Model):
     """This class is a representation of users table."""
     __tablename__ = 'users'
 
-    user_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(60))
-    email = db.Column(db.String(60), unique=True)
+    # user_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60), nullable=False)
+    email = db.Column(db.String(60), primary_key=True)
     password_hash = db.Column(db.String(200))
     is_admin = db.Column(db.Boolean, default=False)
+
+    borrowHistory = db.relationship(
+        'BookHistory', backref='user', lazy='dynamic')
 
     def save(self):
         db.session.add(self)
@@ -32,6 +35,12 @@ class User(db.Model):
         """Check password given is valid."""
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def serialize(self):
+        """Serialize user"""
+        return {'Name': self.name,
+                'is_Admin': self.is_admin}
+
 
 class Books(db.Model):
     """This class is a representation of books table."""
@@ -43,6 +52,9 @@ class Books(db.Model):
     description = db.Column(db.String(200))
     edition = db.Column(db.String(20))
     status = db.Column(db.String(20), default="Available")
+
+    borrowHistory = db.relationship(
+        'BookHistory', backref='book', lazy='dynamic')
 
     def save_book(self):
         db.session.add(self)
@@ -60,11 +72,19 @@ class Books(db.Model):
         """Serialize."""
         return {
             'book_id': self.book_id,
-            'title': self.title,
+            'Title': self.title,
             'author': self.author,
             'description': self.description,
             'edition': self.edition,
             'status': self.status
+        }
+
+    @property
+    def serialize_history(self):
+        """Serialize history log"""
+        return {
+            'Title': self.title,
+            'Author': self.author
         }
 
 
@@ -73,13 +93,12 @@ class BookHistory(db.Model):
     __tablename__ = 'booksHistory'
 
     log_id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer)
     time_borrowed = db.Column(db.DateTime, default=db.func.current_timestamp())
-    user_email = db.Column(db.String(60))
-    title = db.Column(db.String(60))
-    user_name = db.Column(db.String(60))
     return_date = db.Column(db.DateTime)
     returned = db.Column(db.Boolean, default=False)
+
+    user_email = db.Column(db.String, db.ForeignKey(User.email))
+    book_id = db.Column(db.Integer, db.ForeignKey(Books.book_id))
 
     def get_user_history(email):
         return BookHistory.query.filter_by(user_email=email).all()
@@ -100,11 +119,9 @@ class BookHistory(db.Model):
     def serialize(self):
         """Serialize bookHistory."""
         return {
-            "user_name": self.user_email,
+            "User_email": self.user_email,
             "book_id": self.book_id,
             'time_borrowed': self.time_borrowed,
-            'book_title': self.title,
-            'user_name': self.user_name,
             'return_date': self.return_date,
             'returned': self.returned
         }
