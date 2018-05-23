@@ -18,13 +18,16 @@ def register_user():
     password = request.json.get('password')
     is_admin = request.json.get('is_admin')
 
+    res = None
     if not name or name.strip() == "":
-        return jsonify({'Message': 'Fill in  your name to register'})
+        res = {'Message': 'Fill in  your name to register'}
     if not email or re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email.strip()) is None:
-        return jsonify({'Message': 'Fill in a valid email to register'})
+        res = {'Message': 'Fill in a valid email to register'}
     if not password or len(password.strip()) < 6:
-        return jsonify({'Message': 'Fill in  a valid password to register'})
-
+        res = {'Message': 'Fill in  a valid password to register'}
+        
+    if res is not None:
+        return res
     # Check the user with that email exist in the db.
     if not User.get_user_by_email(email):
         new_user = User(name=name, email=email.strip())
@@ -70,10 +73,10 @@ def user_upgrade_view():
         else:
             response = jsonify(
                 {'Message': 'No user with those credentials',
-                "status_code": 204})
+                 "status_code": 204})
         return response
     elif request.method == 'GET':
-        return jsonify(users = [user.serialize for user in User.query.all()])
+        return jsonify(users=[user.serialize for user in User.query.all()])
 
 
 @auth.route('/api/v2/auth/login', methods=['POST'])

@@ -21,14 +21,17 @@ def add_book():
     description = request.json.get('description')
     edition = request.json.get('edition')
 
+    res = None
     if title is None or title.strip() == "":
-        return jsonify({'Message': 'Give your book a title.'})
+        res = {'Message': 'Give your book a title.'}
     if author is None or author.strip() == "":
-        return jsonify({'Message': 'Give the author of the book'})
+        res = {'Message': 'Give the author of the book'}
     if description is None or description.strip() == "":
-        return jsonify({'Message': 'Give your book a short description'})
+        res = {'Message': 'Give your book a short description'}
     if edition is None or edition.strip() == "":
-        return jsonify({'Message': 'What is the edition of this book?'})
+        res = {'Message': 'What is the edition of this book?'}
+    if res is not None:
+        return jsonify(res)
 
     book_added = Books(title=title,
                        author=author,
@@ -37,10 +40,12 @@ def add_book():
 
     # check if the book title exist.
     if Books.query.filter_by(title=title).first():
-        return jsonify({'Message': 'A book with that title already exist.'})
+        response = jsonify(
+            {'Message': 'A book with that title already exist.'}), 409
     else:
         book_added.save_book()
-        return jsonify({'Message': 'Book added successfully.'}), 201
+        response = jsonify({'Message': 'Book added successfully.'}), 201
+    return response
 
 
 @admin.route('/api/v2/books/<bookId>', methods=['PUT', 'DELETE'])
@@ -55,7 +60,7 @@ def specific_book_handler(bookId):
         book = Books.query.filter_by(book_id=bookId).first()
         # Check if such a book exist in db.
         if not book:
-            return jsonify({'Message': 'No book with that Id.'})
+            return jsonify({'Message': 'No book with that Id.', 'status_code': 204})
         elif request.method == 'PUT':
             """Update/modify a book by Id."""
             title = str(request.json.get('title', ''))
@@ -76,6 +81,7 @@ def specific_book_handler(bookId):
                 pass
             book.save_book()
             return jsonify({'Message': 'Your update is successful.'}), 200
+
         elif request.method == 'DELETE':
             book.delete_book()
             return jsonify({'Message': "Book deleted successfully"}), 200
