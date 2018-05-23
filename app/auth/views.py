@@ -1,17 +1,18 @@
 """Create Hello Books API endpoints."""
 import json
+import re
 from flask import jsonify, request
 from flask_jwt_extended import (create_access_token, jwt_required,
                                 get_jwt_identity, get_raw_jwt)
 # from app import app
 from . import auth
 from app.models import User, ActiveTokens, RevokedTokens
+from app.decorators import admin_required
 
 
 @auth.route('/api/v2/auth/register', methods=['POST'])
 def register_user():
     """Endpoint for a new user to register."""
-    USERS = User.query.all()
     name = request.json.get('name')
     email = request.json.get('email')
     password = request.json.get('password')
@@ -19,14 +20,14 @@ def register_user():
 
     if not name or name.strip() == "":
         return jsonify({'Message': 'Fill in  your name to register'})
-    if not email or email.strip() == "":
-        return jsonify({'Message': 'Fill in  your email to register'})
-    if not password or password.strip() == "":
-        return jsonify({'Message': 'Fill in  your password to register'})
+    if not email or re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email.strip()) is None:
+        return jsonify({'Message': 'Fill in a valid email to register'})
+    if not password or len(password.strip()) < 6:
+        return jsonify({'Message': 'Fill in  a valid password to register'})
 
     # Check the user with that email exist in the db.
     if not User.get_user_by_email(email):
-        new_user = User(name=name, email=email)
+        new_user = User(name=name, email=email.strip())
         new_user.hash_password(password)
         if is_admin:
             new_user.is_admin = True
@@ -39,8 +40,40 @@ def register_user():
                 {'Message': 'Successfully registered as a User'}), 201
     else:
         response = jsonify(
-            {'Message': 'Email already registered to another user'})
+            {'Message': 'Email already registered to another user'}), 409
     return response
+
+
+@auth.route('/api/v2/auth/register', methods=['PUT', "GET"])
+@jwt_required
+@admin_required
+def user_upgrade_view():
+    """Upgrade a user into an admin and view all users."""
+    if request.method == 'PUT':
+        email = request.json.get('email')
+        password = request.json.get('password')
+        is_admin = request.json.get('is_admin')
+
+        # Get user from db
+        user = User.get_user_by_email(email)
+        # check if password match
+        if user:
+            if user.check_password(password) and type(is_admin) == bool:
+                status = "Admin" if is_admin else "User"
+                user.is_admin = is_admin
+                user.save()
+                response = jsonify(
+                    {'Message': 'User of {} is now {}'.format(email, status)})
+            else:
+                response = jsonify(
+                    {'Message': 'Invalid user password or have not set a valid is_admin'})
+        else:
+            response = jsonify(
+                {'Message': 'No user with those credentials',
+                "status_code": 204})
+        return response
+    elif request.method == 'GET':
+        return jsonify(users = [user.serialize for user in User.query.all()])
 
 
 @auth.route('/api/v2/auth/login', methods=['POST'])
