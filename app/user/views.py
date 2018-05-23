@@ -1,12 +1,10 @@
 """Create Hello Books API endpoints."""
 import json
 from datetime import datetime, timedelta
-
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity, get_raw_jwt, jwt_required
-
+# Local imports
 from app.models import BookHistory, Books, RevokedTokens, User
-
 from . import user
 
 
@@ -14,7 +12,6 @@ from . import user
 @jwt_required
 def get_user_borrow_history():
     email = get_jwt_identity()
-    jti = get_raw_jwt()['jti']
     returned = request.args.get('returned')
     if returned and returned == "false":
         books_not_returned = BookHistory.get_books_not_returned(email)
@@ -23,7 +20,8 @@ def get_user_borrow_history():
                 {"Message": "You do not have a book that is not returned."})
         else:
             response = jsonify(
-                books=[book.serialize for book in books_not_returned]
+                History=[{**log.serialize, **log.book.serialize_history}
+                         for log in books_not_returned]
             )
     else:
         books_borrowed = BookHistory.get_user_history(email)
@@ -32,7 +30,8 @@ def get_user_borrow_history():
                 {"Message": "You do not have a borrowing history."})
         else:
             response = jsonify(
-                books=[book.serialize for book in books_borrowed]
+                books=[{**borrow.serialize, **borrow.book.serialize_history}
+                       for borrow in books_borrowed]
             )
     return response
 
@@ -67,17 +66,16 @@ def borrow(bookId):
                     return_date = datetime.now() + timedelta(days=7)
                     book_borrowed = BookHistory(user_email=user.email,
                                                 book_id=book.book_id,
-                                                title=book.title,
-                                                user_name=user.name,
                                                 return_date=return_date)
-                    book_borrowed.save_book()
 
+                    response = jsonify(
+                        {**{"Message": "Book borrowed successfully"}, **book.serialize_history,
+                         **book_borrowed.serialize})
+
+                    book_borrowed.save_book()
                     # update books status in library
                     book.status = "Borrowed"
                     book.save_book()
-                    response = jsonify(
-                        {**{"Message": "Book borrowed successfully"},
-                         **book_borrowed.serialize})
 
                 elif request.method == "PUT":
                     book_returned = BookHistory.get_book_by_id(bookId)
@@ -92,6 +90,6 @@ def borrow(bookId):
                     book_returned.return_date = datetime.now()
                     book_returned.save_book()
                     response = jsonify(
-                        {**{"Message": "Book returned successfully"},
+                        {**{"Message": "Book returned successfully"}, **book.serialize_history,
                          **book_returned.serialize})
     return response
