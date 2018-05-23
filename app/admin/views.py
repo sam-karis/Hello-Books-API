@@ -6,27 +6,14 @@ from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_raw_jwt
 
 from . import admin
-
 from app.models import Books, User, RevokedTokens
-
-
-def verify_admin_and_token():
-    jti = get_raw_jwt()['jti']
-    logged_user_email = get_jwt_identity()
-    logged_user = User.get_user_by_email(logged_user_email)
-    if RevokedTokens.is_jti_blacklisted(jti):
-        return jsonify({'Message': 'The token has been blacklisted.'}), 401
-    if not logged_user.is_admin:
-        return jsonify({'Message': 'Need to be an admin add a continue.'}), 401
+from app.decorators import admin_required
 
 
 @admin.route('/api/v2/books', methods=['POST'])
 @jwt_required
+@admin_required
 def add_book():
-    """Add books."""
-    response = verify_admin_and_token()
-    if response:
-        return response
 
     # Get details of the book to be added
     title = request.json.get('title')
@@ -58,11 +45,9 @@ def add_book():
 
 @admin.route('/api/v2/books/<bookId>', methods=['PUT', 'DELETE'])
 @jwt_required
+@admin_required
 def specific_book_handler(bookId):
     """Endpoint to interact with specific book by id."""
-    response = verify_admin_and_token()
-    if response:
-        return response
 
     try:
         bookId = int(bookId)
