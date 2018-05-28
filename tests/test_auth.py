@@ -26,7 +26,7 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # User sample details to test password reset
         self.user_reset = {"email": "jack@andela.com",
-                           "password": "userresetpass"}
+                           "new_password": "userresetpass"}
 
         # User sample details to test logout
         self.user_logout = {"email": "jack@andela.com"}
@@ -175,20 +175,13 @@ class TestAuthEndpoints(unittest.TestCase):
         self.client.post('/api/v2/auth/register', data=json.dumps(self.user),
                          headers={'content-type': 'application/json'})
 
-        # Try to reset to the same password
-        response = self.client.post(
-            '/api/v2/auth/reset-password',
-            data=json.dumps(self.user_login),
-            headers={'content-type': 'application/json'})
-        self.assertIn('Current password used thus no reset.',
-                      str(response.data))
-
-        # Reset password
+        # Reset password by getting sending a token to user email
         response = self.client.post(
             '/api/v2/auth/reset-password',
             data=json.dumps(self.user_reset),
             headers={'content-type': 'application/json'})
-        self.assertIn('Reset successful.', str(response.data))
+        self.assertIn('A password reset token has been sent to your email.',
+                      str(response.data))
 
     def tearDown(self):
         """Return to normal state after test."""
