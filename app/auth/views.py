@@ -8,7 +8,7 @@ from flask_jwt_extended import (create_access_token, jwt_required,
 from . import auth
 from app.models import User, ActiveTokens, RevokedTokens
 from app.decorators import admin_required
-from app.token import generate_reset_password_token, confirm_reset_password_token, send_email
+from app.email_token import generate_reset_password_token, confirm_reset_password_token, send_email
 
 
 @auth.route('/api/v2/auth/register', methods=['POST'])
