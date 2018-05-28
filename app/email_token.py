@@ -5,7 +5,9 @@ from flask_mail import Message
 # Local imports
 from app import create_app, mail
 
-app = create_app(os.getenv('FLASK_CONFIG'))
+config_name= 'development' if os.getenv('FLASK_CONFIG') is None else os.getenv('FLASK_CONFIG')
+
+app = create_app(config_name)
 
 
 def generate_reset_password_token(email):
