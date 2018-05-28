@@ -8,6 +8,7 @@ from flask_jwt_extended import (create_access_token, jwt_required,
 from . import auth
 from app.models import User, ActiveTokens, RevokedTokens
 from app.decorators import admin_required
+from app.token import generate_reset_password_token, confirm_reset_password_token, send_email
 
 
 @auth.route('/api/v2/auth/register', methods=['POST'])
@@ -21,11 +22,12 @@ def register_user():
     res = None
     if not name or name.strip() == "":
         res = {'Message': 'Fill in  your name to register'}
-    if not email or re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email.strip()) is None:
+    if not email or re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",
+                             email.strip()) is None:
         res = {'Message': 'Fill in a valid email to register'}
     if not password or len(password.strip()) < 6:
         res = {'Message': 'Fill in  a valid password to register'}
-        
+
     if res is not None:
         return res
     # Check the user with that email exist in the db.
@@ -140,7 +142,8 @@ def user_logout():
 def password_reset():
     """Endpoint for user to reset his/her password."""
     email = request.json.get('email')
-    password = request.json.get('password')
+    password = request.json.get('new_password')
+    token = request.args.get('token')
     if not email or email.strip() == "":
         return jsonify({'Message': 'Enter email for user to reset password'})
     # Check if there is a user to with the email in db.
@@ -149,12 +152,24 @@ def password_reset():
         res = jsonify({'Message': 'No user registered with {} as their email'
                        .format(email)})
     else:
-        if not password or password.strip() == "":
-            res = jsonify({'Message': 'Enter your new password'})
-        elif updated_user.check_password(password):
-            res = jsonify({'Message': 'Current password used thus no reset.'})
+        if token:
+            token_email = confirm_reset_password_token(token)
+            if token_email == updated_user.email:
+                if not password or len(password.strip()) <= 6 or updated_user.check_password(password):
+                    res = jsonify(
+                        {'Message': 'Enter a valid new password'
+                         '(must be more than 6 characters and not same as the old one)'})
+                else:
+                    updated_user.hash_password(password)
+                    updated_user.save()
+                    res = jsonify({'Message': 'Reset successful.'})
+            else:
+                res = jsonify(
+                    {'Message': 'Invalid or expired token for the user.'})
         else:
-            updated_user.hash_password(password)
-            updated_user.save()
-            res = jsonify({'Message': 'Reset successful.'})
+            token = generate_reset_password_token(email)
+            send_email(email, token)
+            res = jsonify(
+                {'Message': 'A password reset token has been sent to your email.'})
+
     return res

@@ -2,9 +2,12 @@
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 # local import
 from config import app_config
+
 db = SQLAlchemy()
+mail = Mail()
 
 
 def create_app(config_name):
@@ -15,6 +18,7 @@ def create_app(config_name):
     app.url_map.strict_slashes = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    mail.init_app(app)
     app.config['JWT_SECRET_KEY'] = 'jwt-token-secret-key'
 
     from .auth import auth as auth_blueprint
