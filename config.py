@@ -4,7 +4,7 @@ import os
 
 class Config(object):
     """Common configuration Setting."""
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:mypass_bootcamp@localhost:5432/hello_books"
+    SQLALCHEMY_DATABASE_URI= os.getenv('DATABASE_URL')
     DEBUG = False
     TESTING = False
 
