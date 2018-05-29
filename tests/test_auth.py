@@ -2,7 +2,7 @@
 import unittest
 import json
 # local imports.
-from app import create_app, db
+from app import create_app, db, mail
 from app.models import User
 
 
@@ -26,7 +26,7 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # User sample details to test password reset
         self.user_reset = {"email": "jack@andela.com",
-                           "password": "userresetpass"}
+                           "new_password": "userresetpass"}
 
         # User sample details to test logout
         self.user_logout = {"email": "jack@andela.com"}
@@ -175,20 +175,31 @@ class TestAuthEndpoints(unittest.TestCase):
         self.client.post('/api/v2/auth/register', data=json.dumps(self.user),
                          headers={'content-type': 'application/json'})
 
-        # Try to reset to the same password
-        response = self.client.post(
-            '/api/v2/auth/reset-password',
-            data=json.dumps(self.user_login),
-            headers={'content-type': 'application/json'})
-        self.assertIn('Current password used thus no reset.',
-                      str(response.data))
+        # Reset password by getting sending a token to user email
+        with mail.record_messages() as outbox:
+            response = self.client.post(
+                '/api/v2/auth/reset-password',
+                data=json.dumps(self.user_reset),
+                headers={'content-type': 'application/json'})
+            self.assertIn('A password reset token has been sent to your email.',
+                          str(response.data))
+            token = outbox[0].body
+            wrong_token = token[::-1]
+            # Reset with the right token
+            response = self.client.post(
+                '/api/v2/auth/reset-password?token={}'.format(wrong_token),
+                data=json.dumps(self.user_reset),
+                headers={'content-type': 'application/json'})
+            self.assertIn('nvalid or expired token for the user.',
+                          str(response.data))
 
-        # Reset password
-        response = self.client.post(
-            '/api/v2/auth/reset-password',
-            data=json.dumps(self.user_reset),
-            headers={'content-type': 'application/json'})
-        self.assertIn('Reset successful.', str(response.data))
+            # Reset with the right token
+            response = self.client.post(
+                '/api/v2/auth/reset-password?token={}'.format(token),
+                data=json.dumps(self.user_reset),
+                headers={'content-type': 'application/json'})
+            self.assertIn('Reset successful.',
+                          str(response.data))
 
     def tearDown(self):
         """Return to normal state after test."""

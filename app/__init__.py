@@ -1,11 +1,13 @@
 """Create the app."""
-import os
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 # local import
 from config import app_config
+
 db = SQLAlchemy()
+mail = Mail()
 
 
 def create_app(config_name):
@@ -16,6 +18,7 @@ def create_app(config_name):
     app.url_map.strict_slashes = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    mail.init_app(app)
     app.config['JWT_SECRET_KEY'] = 'jwt-token-secret-key'
 
     from .auth import auth as auth_blueprint
@@ -35,10 +38,22 @@ def create_app(config_name):
     @app.errorhandler(404)
     def invalid_endpoint(error=None):
         """Handle wrong endpoints."""
-        message = {
-            'message': 'You entered an invalid url',
-            'URL': 'Not found : ' + request.url
-        }
-        return jsonify(message), 404
+        return jsonify({
+            'message': '{} is not a valid url'.format(request.url)
+        }), 404
+
+    @app.errorhandler(405)
+    def wrong_request_method(error=None):
+        """Handle wrong methods for an endpoints."""
+        request_method = request.method
+        return jsonify({
+            'message': 'The {} method is not allowed for this endpoint'
+            .format(request_method)}), 405
+
+    @app.errorhandler(400)
+    def wrong_request(error=None):
+        """Handle wrong requests(not json format) for an endpoints."""
+        return jsonify({
+            'message': 'The endpoint support JSON requests only.'}), 400
 
     return app

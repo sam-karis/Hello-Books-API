@@ -49,8 +49,8 @@ class TestBookEndpoints(unittest.TestCase):
         """Test if get all books endpoints works as expected route."""
         # Get books when the library is empty
         response = self.client.get('/api/v2/books')
-        self.assertEqual(response.status_code, 204,
-                         msg="No books in the library")
+        self.assertIn("No books on this page.", str(response.data),
+                      msg="No books in the library")
 
         access_token = TestAdminEndpoints.register_login_admin(self)
 
@@ -104,8 +104,23 @@ class TestBookEndpoints(unittest.TestCase):
         """Test if api handles wrong url."""
         # Try to get a book from wrong url
         response = self.client.get('/api/v2/booooks')
-        self.assertIn("You entered an invalid url", str(response.data),
-                      msg="Handles invalid url")
+        self.assertIn("http://localhost/api/v2/booooks is not a valid url",
+                      str(response.data), msg="Handles invalid url")
+
+    def test_wrong_request_method(self):
+        """Test if api handles wrong url."""
+        # Try to use a wrong request method on valid endpoint
+        response = self.client.delete('/api/v2/books')
+        self.assertIn("The DELETE method is not allowed for this endpoint",
+                      str(response.data), msg="Handles wrong request method")
+
+    def test_bad_request(self):
+        """Test if api handles bad requests/not in json format."""
+        # Try to use a bad request on valid endpoint
+        response = self.client.post('/api/v2/auth/register',
+                                    headers={'content-type': 'application/json'})
+        self.assertIn("The endpoint support JSON requests only.",
+                      str(response.data), msg="Handles wrong request method")
 
     def tearDown(self):
         """Return to normal state after test."""
