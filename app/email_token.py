@@ -29,4 +29,5 @@ def send_email(To, Subject):
     msg = Message(subject='Password Reset Token', recipients=[To],
                   html='<p> To reset your password use this token :'
                   ' <a href="#"><strong>{}</strong></a></p>'.format(Subject))
+    msg.body = Subject
     mail.send(msg)
