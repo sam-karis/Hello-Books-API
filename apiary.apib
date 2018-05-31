@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://hello-books-api-v1.herokuapp.com/api/v1
+HOST: https://hello-books-api-v2.herokuapp.com/api/v2
 
 # hello-book-api
 
@@ -8,8 +8,8 @@ Hello-Books-API is a simple api where it users can do the following:
 - View all Books and Add a book
 - Delete, Update, and View one Book
 
-## Register a user [/auth/register]
-#### To register [POST]
+## Register [/auth/register]
+#### To register user [POST]
 
 + Request (application/json)
 
@@ -22,7 +22,24 @@ Hello-Books-API is a simple api where it users can do the following:
 + Response 200 (application/json)
 
         {
-            "Message": "User has successfully registered"
+            "Message": "Successfully registered as an User"
+        }
+
+#### To register Admin [POST]
+
++ Request (application/json)
+
+        {
+            "name" : "Sam",
+            "email": "samkaris75@gmail.com",
+            "password": "secretpassword",
+            "is_admin": True
+        }
+
++ Response 200 (application/json)
+
+        {
+            "Message": "Successfully registered as an Admin"
         }
 
 ## For registered users [/auth/login]
@@ -38,7 +55,9 @@ Hello-Books-API is a simple api where it users can do the following:
 + Response 200 (application/json)
 
         {
-            "Message": "Successfuly login"
+            "Message": "Successfuly login",
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1Mjc3Mzc5OTIsIm5iZiI6MTUyNzczNzk5MiwianRpIjoiZGY4YjA0OTktMTE2OS00NGFhLWE5YTYtYjM0MjJkYzdlODFkIiwiZXhwIjoxNTI3NzM4ODkyLCJpZGVudGl0eSI6InNhbWthcmlzQGFuZGVsYS5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.bxY6ZLmKwG_IOjBqNuMeN7OnFN41qUpw0En11M3fYKI"
+
         }
 
 ## For logged in users [/auth/logout]
@@ -62,7 +81,7 @@ Hello-Books-API is a simple api where it users can do the following:
 + Request 200 (application/json)
 
         {
-            "email": "samkaris@andela.com",
+            "email": "samkaris75@andela.com",
             "password" : "rem-password"
         }
         
