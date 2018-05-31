@@ -56,4 +56,10 @@ def create_app(config_name):
         return jsonify({
             'message': 'The endpoint support JSON requests only.'}), 400
 
+    @app.errorhandler(500)
+    def server_error(error=None):
+        """Handle internal server error for an endpoints."""
+        return jsonify({
+            'message': 'Verify your request it cause a server error'}), 500
+
     return app
