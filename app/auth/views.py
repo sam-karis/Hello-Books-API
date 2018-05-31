@@ -10,6 +10,12 @@ from app.models import User, ActiveTokens, RevokedTokens
 from app.decorators import admin_required
 from app.email_token import generate_reset_password_token, confirm_reset_password_token, send_email
 
+def validate_email(email):
+    valid = re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",email.strip())
+    if valid is None:
+        return False
+    return True
+
 
 @auth.route('/api/v2/auth/register', methods=['POST'])
 def register_user():
@@ -22,8 +28,7 @@ def register_user():
     res = None
     if not password or len(password.strip()) < 6:
         res = {'Message': 'Fill in  a valid password to register'}
-    if not email or re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",
-                             email.strip()) is None:
+    if not email or not validate_email(email):
         res = {'Message': 'Fill in a valid email to register'}
     if not name or name.strip() == "":
         res = {'Message': 'Fill in  your name to register'}
@@ -56,14 +61,16 @@ def user_upgrade_view():
     """Upgrade a user into an admin and view all users."""
     if request.method == 'PUT':
         email = request.json.get('email')
-        password = request.json.get('password')
         is_admin = request.json.get('is_admin')
+
+        if not email or not validate_email(email):
+            return jsonify({'Message': 'Fill in a valid email'})
 
         # Get user from db
         user = User.get_user_by_email(email)
         # check if password match
         if user:
-            if user.check_password(password) and type(is_admin) == bool:
+            if type(is_admin) == bool:
                 status = "Admin" if is_admin else "User"
                 user.is_admin = is_admin
                 user.save()
@@ -71,10 +78,10 @@ def user_upgrade_view():
                     {'Message': 'User of {} is now {}'.format(email, status)})
             else:
                 response = jsonify(
-                    {'Message': 'Invalid user password or have not set a valid is_admin'})
+                    {'Message': 'set a valid is_admin'})
         else:
             response = jsonify(
-                {'Message': 'No user with those credentials',
+                {'Message': 'No user with registered with that email',
                  "status_code": 204})
         return response
     elif request.method == 'GET':
@@ -86,7 +93,7 @@ def user_login():
     """Endpoint for user to login."""
     email = request.json.get('email')
     password = request.json.get('password')
-    if not email or email is None or email.strip() == "":
+    if not email or not validate_email(email):
         return jsonify({"Message": "Enter a valid email"})
     if not password or password.strip() == "" or password is None:
         return jsonify({"Message": "Enter a valid password"})
@@ -119,7 +126,7 @@ def user_login():
 def user_logout():
     """Endpoint for user to logout."""
     email = request.json.get('email')
-    if email is None:
+    if email is None or not validate_email(email):
         response = jsonify({
             "Message": "Enter the email of the user you want to logout."
         })
@@ -144,7 +151,7 @@ def password_reset():
     email = request.json.get('email')
     password = request.json.get('new_password')
     token = request.args.get('token')
-    if not email or email.strip() == "":
+    if not email or not validate_email(email):
         return jsonify({'Message': 'Enter email for user to reset password'})
     # Check if there is a user to with the email in db.
     updated_user = User.get_user_by_email(email)
