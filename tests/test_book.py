@@ -36,6 +36,7 @@ class TestBookEndpoints(unittest.TestCase):
         self.admin = {"name": "sam",
                       "email": "samkaris@andela.com",
                       "password": "adminsecretpass",
+                      "confirm_password": "adminsecretpass",
                       "is_admin": True}
 
         # Admin sample details to login

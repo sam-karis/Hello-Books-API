@@ -60,7 +60,7 @@ def specific_book_handler(bookId):
         book = Books.query.filter_by(book_id=bookId).first()
         # Check if such a book exist in db.
         if not book:
-            return jsonify({'Message': 'No book with that Id.', 'status_code': 204})
+            return jsonify({'Message': 'No book with that Id.', 'status': 204})
         elif request.method == 'PUT':
             """Update/modify a book by Id."""
             title = str(request.json.get('title', ''))

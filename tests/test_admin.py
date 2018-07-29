@@ -30,6 +30,7 @@ class TestAdminEndpoints(unittest.TestCase):
         self.admin = {"name": "sam",
                       "email": "samkaris@andela.com",
                       "password": "adminsecretpass",
+                      "confirm_password": "adminsecretpass",
                       "is_admin": True}
 
         # Admin sample details to login
@@ -39,7 +40,8 @@ class TestAdminEndpoints(unittest.TestCase):
         # User sample details to register new user
         self.user = {"name": "Jack",
                      "email": "jack@andela.com",
-                     "password": "usersecretpass"}
+                     "password": "usersecretpass",
+                     "confirm_password": "usersecretpass",}
 
         # User sample details to login
         self.user_login = {"email": "jack@andela.com",

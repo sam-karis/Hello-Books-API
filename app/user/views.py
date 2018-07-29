@@ -27,7 +27,7 @@ def get_user_borrow_history():
         books_borrowed = BookHistory.get_user_history(email)
         if not books_borrowed:
             response = jsonify(
-                {"Message": "You do not have a borrowing history."})
+                {"Message": "You do not have a borrowing history.", "status":204})
         else:
             response = jsonify(
                 books=[{**borrow.serialize, **borrow.book.serialize_history}

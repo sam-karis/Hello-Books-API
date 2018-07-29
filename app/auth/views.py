@@ -11,7 +11,8 @@ from app.decorators import admin_required
 from app.email_token import generate_reset_password_token, confirm_reset_password_token, send_email
 
 def validate_email(email):
-    valid = re.match("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",email.strip())
+    valid = re.match(
+        "(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email.strip())
     if valid is None:
         return False
     return True
@@ -21,8 +22,10 @@ def validate_email(email):
 def register_user():
     """Endpoint for a new user to register."""
     name = request.json.get('name')
+    username = request.json.get('username')
     email = request.json.get('email')
     password = request.json.get('password')
+    confirm_password = request.json.get('confirm_password')
     is_admin = request.json.get('is_admin')
 
     res = None
@@ -34,11 +37,13 @@ def register_user():
         res = {'Message': 'Fill in  your name to register'}
 
     if res is not None:
-        return jsonify(res)
+        return jsonify(res), 406
     # Check the user with that email exist in the db.
     if not User.get_user_by_email(email):
-        new_user = User(name=name, email=email.strip())
+        new_user = User(name=name, email=email.strip(), username=username)
         new_user.hash_password(password)
+        if not new_user.check_password(confirm_password):
+            return jsonify({'Message': 'Password do not match'}), 409
         if is_admin:
             new_user.is_admin = True
             new_user.save()
@@ -102,22 +107,27 @@ def user_login():
     if logged_in_user and not logged_in_user.is_expired() \
             and user.check_password(password):
         response = jsonify({'Message': 'You are already logged In',
-                            "access_token": logged_in_user.access_token})
-    elif logged_in_user and logged_in_user.is_expired():
+                            'email': user.email, 'username': user.username,
+                            "access_token": logged_in_user.access_token,
+                            'is_admin': user.is_admin})
+    elif logged_in_user and logged_in_user.is_expired() \
+            and user.check_password(password):
         access_token = create_access_token(identity=email)
         logged_in_user.access_token = access_token
         logged_in_user.save_token()
         response = jsonify({'Message': 'Your token expired use token below.',
-                            'access_token': access_token}), 200
+                            'access_token': access_token, 'email': user.email,
+                            'username': user.username, 'is_admin': user.is_admin}), 200
     else:
         # Get the user from db using the mail
         if user and user.check_password(password):
             access_token = create_access_token(identity=email)
             ActiveTokens(email, access_token).save_token()
             response = jsonify({'Message': 'Successfuly login',
-                                'access_token': access_token}), 200
+                                'access_token': access_token, 'email': user.email,
+                                'username': user.username, 'is_admin': user.is_admin}), 200
         else:
-            response = jsonify({'Messsage': 'Invalid email or password'}), 401
+            response = jsonify({'Message': 'Invalid email or password'}), 401
     return response
 
 

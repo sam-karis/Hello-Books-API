@@ -18,7 +18,8 @@ class TestAuthEndpoints(unittest.TestCase):
         # User sample details to test register
         self.user = {"name": "Jack",
                      "email": "jack@andela.com",
-                     "password": "usersecretpass"}
+                     "password": "usersecretpass",
+                     "confirm_password": "usersecretpass",}
 
         # User sample details to test login
         self.user_login = {"email": "jack@andela.com",
@@ -39,6 +40,7 @@ class TestAuthEndpoints(unittest.TestCase):
         self.admin = {"name": "samkaris",
                       "email": "samkaris@andela.com",
                       "password": "adminsecretpass",
+                      "confirm_password": "adminsecretpass",
                       "is_admin": True}
 
         with self.app.app_context():

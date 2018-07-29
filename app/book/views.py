@@ -41,9 +41,9 @@ def get_specific_book_by_id(bookId):
         book = Books.query.filter_by(book_id=bookId).first()
         # Check if such a book exist in db.
         if not book:
-            return jsonify({'Message': 'No book with that Id.'})
+            return jsonify({'Message': 'No book with that Id.', 'status': 204})
         else:
             # Return the book in json format
-            return jsonify(book.serialize)
+            return jsonify(book.serialize), 200
     except ValueError:
         return jsonify({'Message': 'Use a valid book Id'}), 404

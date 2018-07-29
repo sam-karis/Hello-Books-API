@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
+from flask_cors import CORS
 # local import
 from config import app_config
 
@@ -12,6 +13,7 @@ mail = Mail()
 
 def create_app(config_name):
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
     app.secret_key = 'super secret key'
