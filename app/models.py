@@ -16,7 +16,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
 
     borrowHistory = db.relationship(
-        'BookHistory', backref='user', lazy='dynamic')
+        'BookHistory', backref='user', cascade="all,delete", lazy='dynamic')
 
     def save(self):
         db.session.add(self)
@@ -55,7 +55,7 @@ class Books(db.Model):
     status = db.Column(db.String(20), default="Available")
 
     borrowHistory = db.relationship(
-        'BookHistory', backref='book', lazy='dynamic')
+        'BookHistory', backref='book', cascade="all,delete", lazy='dynamic')
 
     def save_book(self):
         db.session.add(self)
@@ -108,9 +108,9 @@ class BookHistory(db.Model):
         return BookHistory.query.filter_by(
             user_email=email, returned=False).all()
 
-    def get_book_by_id(book_id):
+    def get_book_by_id(book_id, email):
         return BookHistory.query.filter_by(
-            book_id=book_id, returned=False).first()
+            book_id=book_id, user_email=email, returned=False).first()
 
     def save_book(self):
         db.session.add(self)
