@@ -99,9 +99,9 @@ def user_login():
     email = request.json.get('email')
     password = request.json.get('password')
     if not email or not validate_email(email):
-        return jsonify({"Message": "Enter a valid email"})
+        return jsonify({"Message": "Enter a valid email"}), 401
     if not password or password.strip() == "" or password is None:
-        return jsonify({"Message": "Enter a valid password"})
+        return jsonify({"Message": "Enter a valid password"}), 401
     user = User.get_user_by_email(email)
     logged_in_user = ActiveTokens.find_user_with_token(email)
     if logged_in_user and not logged_in_user.is_expired() \
@@ -151,7 +151,7 @@ def user_logout():
         else:
             response = jsonify(
                 {'Message': '{} is not logged In or token has been blacklisted'
-                 .format(email)})
+                 .format(email)}), 401
     return response
 
 

@@ -12,6 +12,10 @@ from . import user
 @jwt_required
 def get_user_borrow_history():
     email = get_jwt_identity()
+    jti = get_raw_jwt()['jti']
+    if RevokedTokens.is_jti_blacklisted(jti):
+        return jsonify(
+                {"Message": "Login to get a valid token to Continue"}), 401
     returned = request.args.get('returned')
     if returned and returned == "false":
         books_not_returned = BookHistory.get_books_not_returned(email)
@@ -52,9 +56,10 @@ def borrow(bookId):
         logged_user = get_jwt_identity()
         if logged_user != email or RevokedTokens.is_jti_blacklisted(jti):
             response = jsonify(
-                {"Message": "Login to get a valid token to Continue"})
+                {"Message": "Login to get a valid token to Continue"}), 401
         else:
             book = Books.get_book_by_id(bookId)
+            user = User.get_user_by_email(email)
             if not book:
                 response = jsonify({"Message": "No book with that Id."})
             else:
@@ -62,7 +67,6 @@ def borrow(bookId):
                     if book.status == "Borrowed":
                         return jsonify({
                             "Message": "Somebody already borrowed this book"})
-                    user = User.get_user_by_email(email)
                     return_date = datetime.now() + timedelta(days=7)
                     book_borrowed = BookHistory(user_email=user.email,
                                                 book_id=book.book_id,
@@ -78,10 +82,10 @@ def borrow(bookId):
                     book.save_book()
 
                 elif request.method == "PUT":
-                    book_returned = BookHistory.get_book_by_id(bookId)
-                    if book.status == "Available":
+                    book_returned = BookHistory.get_book_by_id(bookId, email)
+                    if book.status == "Available" or not book_returned:
                         return jsonify({
-                            "Message": "The book is not borrowed to return"})
+                            "Message": "You cannot return a book you did not borrow"}), 400
                     # Set book status to available in book db.
                     book.status = "Available"
                     book.save_book()
@@ -91,5 +95,5 @@ def borrow(bookId):
                     book_returned.save_book()
                     response = jsonify(
                         {**{"Message": "Book returned successfully"}, **book.serialize_history,
-                         **book_returned.serialize})
+                         **book_returned.serialize}), 200
     return response
