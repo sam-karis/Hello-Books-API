@@ -19,7 +19,7 @@ class TestAuthEndpoints(unittest.TestCase):
         self.user = {"name": "Jack",
                      "email": "jack@andela.com",
                      "password": "usersecretpass",
-                     "confirm_password": "usersecretpass",}
+                     "confirm_password": "usersecretpass", }
 
         # User sample details to test login
         self.user_login = {"email": "jack@andela.com",
@@ -27,7 +27,8 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # User sample details to test password reset
         self.user_reset = {"email": "jack@andela.com",
-                           "new_password": "userresetpass"}
+                           "new_password": "userresetpass",
+                           "confirm_new_password": "userresetpass"}
 
         # User sample details to test logout
         self.user_logout = {"email": "jack@andela.com"}
@@ -62,34 +63,16 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertIn('Email already registered to another user',
                       str(response_two.data),
                       msg="Cant register same user twice")
-
-    def test_register_admin(self):
-        """Test if  registering an admin work as expected."""
-        # Register a new admin
-        response = self.client.post(
-            '/api/v2/auth/register', data=json.dumps(self.admin),
-            headers={'content-type': 'application/json'})
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('Successfully registered as an Admin',
-                      str(response.data),
-                      msg="Register new Admin successfully")
-
-        # Register an admin twice
-        response_two = self.client.post(
-            '/api/v2/auth/register', data=json.dumps(self.admin),
-            headers={'content-type': 'application/json'})
-        self.assertIn('Email already registered to another user',
-                      str(response_two.data),
-                      msg="Cant register same admin twice twice")
+                msg = "Cant register same admin twice twice")
 
     def test_login_user(self):
         """Test if  login endpoint work as expected."""
         # Register a user to login
-        self.client.post('/api/v2/auth/register', data=json.dumps(self.user),
-                         headers={'content-type': 'application/json'})
+        self.client.post('/api/v2/auth/register', data = json.dumps(self.user),
+                         headers = {'content-type': 'application/json'})
 
         # Login a user
-        response = self.client.post(
+        response=self.client.post(
             '/api/v2/auth/login', data=json.dumps(self.user_login),
             headers={'content-type': 'application/json'})
         # Test if login was successful with right credentials

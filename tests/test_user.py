@@ -3,7 +3,7 @@ import unittest
 import json
 # local imports.
 from app import create_app, db
-from app.models import Books
+from app.models import Books, User
 from .test_admin import TestAdminEndpoints
 
 
@@ -58,6 +58,12 @@ class TestUserEndpoints(unittest.TestCase):
 
         with self.app.app_context():
             db.create_all()
+            self.new_admin = User(name ="sam",
+                      email= "samkaris@andela.com",
+                      username= "admin")
+            self.new_admin.is_admin = True
+            self.new_admin.hash_password('adminsecretpass')
+            self.new_admin.save()
 
     def add_books_test_db(self):
         """Add two books in tests db."""
@@ -134,7 +140,7 @@ class TestUserEndpoints(unittest.TestCase):
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer {}'
                      .format(access_token)})
-        self.assertIn("The book is not borrowed to return", str(response.data))
+        self.assertIn("You cannot return a book you did not borrow", str(response.data))
 
         # Ruturn book two borrowed above
         response = self.client.put(

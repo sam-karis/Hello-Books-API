@@ -3,7 +3,7 @@ import unittest
 import json
 # local imports.
 from app import create_app, db
-from app.models import Books
+from app.models import Books, User
 from tests.test_admin import TestAdminEndpoints
 
 
@@ -32,19 +32,18 @@ class TestBookEndpoints(unittest.TestCase):
             "title": "Winning start in your mind"
         }
 
-        # Admin sample details to register new admin
-        self.admin = {"name": "sam",
-                      "email": "samkaris@andela.com",
-                      "password": "adminsecretpass",
-                      "confirm_password": "adminsecretpass",
-                      "is_admin": True}
-
         # Admin sample details to login
         self.admin_login = {"email": "samkaris@andela.com",
                             "password": "adminsecretpass"}
 
         with self.app.app_context():
             db.create_all()
+            self.new_admin = User(name ="sam",
+                      email= "samkaris@andela.com",
+                      username= "admin")
+            self.new_admin.is_admin = True
+            self.new_admin.hash_password("adminsecretpass")
+            self.new_admin.save()
 
     def test_get_all_books(self):
         """Test if get all books endpoints works as expected route."""

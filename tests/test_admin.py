@@ -49,12 +49,14 @@ class TestAdminEndpoints(unittest.TestCase):
 
         with self.app.app_context():
             db.create_all()
+            self.new_admin = User(name ="sam",
+                      email= "samkaris@andela.com",
+                      username= "admin")
+            self.new_admin.is_admin = True
+            self.new_admin.hash_password("adminsecretpass")
+            self.new_admin.save()
 
     def register_login_admin(self):
-        # Register a new admin
-        self.client.post('/api/v2/auth/register', data=json.dumps(self.admin),
-                         headers={'content-type': 'application/json'})
-
         # Login a admin
         login_response = self.client.post(
             '/api/v2/auth/login', data=json.dumps(self.admin_login),
