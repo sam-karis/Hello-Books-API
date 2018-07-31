@@ -63,7 +63,6 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertIn('Email already registered to another user',
                       str(response_two.data),
                       msg="Cant register same user twice")
-                msg = "Cant register same admin twice twice")
 
     def test_login_user(self):
         """Test if  login endpoint work as expected."""
