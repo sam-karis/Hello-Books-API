@@ -1,6 +1,7 @@
 """Create Hello Books API endpoints."""
 import json
 import re
+import os
 from flask import jsonify, request
 from flask_jwt_extended import (create_access_token, jwt_required,
                                 get_jwt_identity, get_raw_jwt)
@@ -9,6 +10,7 @@ from . import auth
 from app.models import User, ActiveTokens, RevokedTokens
 from app.decorators import admin_required
 from app.email_token import generate_reset_password_token, confirm_reset_password_token, send_email
+
 
 def validate_email(email):
     valid = re.match(
@@ -26,7 +28,6 @@ def register_user():
     email = request.json.get('email')
     password = request.json.get('password')
     confirm_password = request.json.get('confirm_password')
-    is_admin = request.json.get('is_admin')
 
     res = None
     if not password or len(password.strip()) < 6:
@@ -44,15 +45,10 @@ def register_user():
         new_user.hash_password(password)
         if not new_user.check_password(confirm_password):
             return jsonify({'Message': 'Password do not match'}), 409
-        if is_admin:
-            new_user.is_admin = True
-            new_user.save()
-            response = jsonify(
-                {'Message': 'Successfully registered as an Admin'}), 201
-        else:
-            new_user.save()
-            response = jsonify(
-                {'Message': 'Successfully registered as a User'}), 201
+
+        new_user.save()
+        response = jsonify(
+            {'Message': 'Successfully registered as a User'}), 201
     else:
         response = jsonify(
             {'Message': 'Email already registered to another user'}), 409
@@ -160,14 +156,15 @@ def password_reset():
     """Endpoint for user to reset his/her password."""
     email = request.json.get('email')
     password = request.json.get('new_password')
+    confirm_password = request.json.get('confirm_new_password')
     token = request.args.get('token')
     if not email or not validate_email(email):
-        return jsonify({'Message': 'Enter email for user to reset password'})
+        return jsonify({'Message': 'Enter email for user to reset password'}), 400
     # Check if there is a user to with the email in db.
     updated_user = User.get_user_by_email(email)
     if not updated_user:
         res = jsonify({'Message': 'No user registered with {} as their email'
-                       .format(email)})
+                       .format(email)}), 400
     else:
         if token:
             token_email = confirm_reset_password_token(token)
@@ -175,17 +172,20 @@ def password_reset():
                 if not password or len(password.strip()) <= 6 or updated_user.check_password(password):
                     res = jsonify(
                         {'Message': 'Enter a valid new password'
-                         '(must be more than 6 characters and not same as the old one)'})
+                         '- must be more than 6 characters and not same as the old one'}), 422
                 else:
+                    if not password == confirm_password:
+                        return jsonify({'Message': 'Password do not match'}), 403
                     updated_user.hash_password(password)
                     updated_user.save()
-                    res = jsonify({'Message': 'Reset successful.'})
+                    res = jsonify({'Message': 'Reset successful.'}), 200
             else:
                 res = jsonify(
-                    {'Message': 'Invalid or expired token for the user.'})
+                    {'Message': 'Invalid or expired token for the user.'}), 401
         else:
+            reset_url = os.getenv('front_end_url') + 'resetpassword'
             token = generate_reset_password_token(email)
-            send_email(email, token)
+            send_email(email, token, reset_url)
             res = jsonify(
                 {'Message': 'A password reset token has been sent to your email.'})
 
