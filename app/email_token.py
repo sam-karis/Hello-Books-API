@@ -25,9 +25,9 @@ def confirm_reset_password_token(token, exipiration=600):
     return email
 
 
-def send_email(To, Subject):
+def send_email(To, Subject, url):
     msg = Message(subject='Password Reset Token', recipients=[To],
-                  html='<p> To reset your password use this token :'
-                  ' <a href="#"><strong>{}</strong></a></p>'.format(Subject))
+                  html='<p> To reset your password use this link :'
+                  ' <a href="{}/{}/{}"><strong>Reset Link</strong></a></p>'.format(url, Subject, To))
     msg.body = Subject
     mail.send(msg)
