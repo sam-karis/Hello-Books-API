@@ -14,7 +14,7 @@ def get_all_book():
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', books_in_library, type=int)
 
-    BOOKS = Books.query.order_by(Books.book_id).paginate(
+    BOOKS = Books.query.filter_by(soft_deleted=False).order_by(Books.book_id).paginate(
         per_page=int(limit), page=int(page), error_out=False)
 
     if not BOOKS.items:
@@ -38,7 +38,7 @@ def get_specific_book_by_id(bookId):
         bookId = int(bookId)
 
         # Get book with that id from db.
-        book = Books.query.filter_by(book_id=bookId).first()
+        book = Books.query.filter_by(book_id=bookId, soft_deleted=False).first()
         # Check if such a book exist in db.
         if not book:
             return jsonify({'Message': 'No book with that Id.', 'status': 204})

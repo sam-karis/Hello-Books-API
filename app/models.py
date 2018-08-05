@@ -48,11 +48,12 @@ class Books(db.Model):
     __tablename__ = 'books'
 
     book_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(60), nullable=False, unique=True)
+    title = db.Column(db.String(60), nullable=False)
     author = db.Column(db.String(60))
     description = db.Column(db.String(200))
     edition = db.Column(db.String(20))
     status = db.Column(db.String(20), default="Available")
+    soft_deleted = db.Column(db.Boolean, default=False)
 
     borrowHistory = db.relationship(
         'BookHistory', backref='book', cascade="all,delete", lazy='dynamic')
@@ -61,12 +62,8 @@ class Books(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def delete_book(self):
-        db.session.delete(self)
-        db.session.commit()
-
     def get_book_by_id(book_id):
-        return Books.query.filter_by(book_id=book_id).first()
+        return Books.query.filter_by(book_id=book_id, soft_deleted=False).first()
 
     @property
     def serialize(self):

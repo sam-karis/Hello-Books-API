@@ -108,7 +108,7 @@ class TestAdminEndpoints(unittest.TestCase):
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer {}'.format(access_token)})
         # Test that the endpoint does not allow addition a book twice
-        self.assertIn('A book with that title already exist.',
+        self.assertIn('A book with that title, author and edition already exist',
                       str(response.data))
 
     def test_user_add_book(self):

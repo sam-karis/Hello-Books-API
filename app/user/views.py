@@ -24,7 +24,7 @@ def get_user_borrow_history():
                 {"Message": "You do not have a book that is not returned."})
         else:
             response = jsonify(
-                History=[{**log.serialize, **log.book.serialize_history}
+                books=[{**log.serialize, **log.book.serialize_history}
                          for log in books_not_returned]
             )
     else:

@@ -39,9 +39,10 @@ def add_book():
                        edition=edition)
 
     # check if the book title exist.
-    if Books.query.filter_by(title=title).first():
+    if Books.query.filter_by(title=title, author=author,
+                             edition=edition, soft_deleted=False).first():
         response = jsonify(
-            {'Message': 'A book with that title already exist.'}), 409
+            {'Message': 'A book with that title, author and edition already exist.'}), 409
     else:
         book_added.save_book()
         response = jsonify({'Message': 'Book added successfully.'}), 201
@@ -57,7 +58,8 @@ def specific_book_handler(bookId):
     try:
         bookId = int(bookId)
         # Get book with that id from db.
-        book = Books.query.filter_by(book_id=bookId).first()
+        book = Books.query.filter_by(
+            book_id=bookId, soft_deleted=False).first()
         # Check if such a book exist in db.
         if not book:
             return jsonify({'Message': 'No book with that Id.', 'status': 204})
@@ -83,7 +85,10 @@ def specific_book_handler(bookId):
             return jsonify({'Message': 'Your update is successful.'}), 200
 
         elif request.method == 'DELETE':
-            book.delete_book()
+            if book.status == "Borrowed":
+                return jsonify({'Message': "Cannot delete a borrowed book before it's returned"}), 409
+            book.soft_deleted = True
+            book.save_book()
             return jsonify({'Message': "Book deleted successfully"}), 200
     except ValueError:
         return jsonify({'Message': 'Use a valid book Id'}), 404
