@@ -1,10 +1,11 @@
 """Set configuration  settings."""
-import os
+import os, datetime
 
 
 class Config(object):
     """Common configuration Setting."""
     SQLALCHEMY_DATABASE_URI= os.getenv('DATABASE_URL')
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=60)
     DEBUG = False
     TESTING = False
 
