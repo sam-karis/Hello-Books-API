@@ -73,7 +73,7 @@ def borrow(bookId):
                                                 return_date=return_date)
 
                     response = jsonify(
-                        {**{"Message": "Book borrowed successfully"}, **book.serialize_history,
+                        {**{"Message": "Book borrowed successfully, you have 7 days to return."}, **book.serialize_history,
                          **book_borrowed.serialize})
 
                     book_borrowed.save_book()
