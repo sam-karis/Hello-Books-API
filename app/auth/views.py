@@ -187,6 +187,6 @@ def password_reset():
             token = generate_reset_password_token(email)
             send_email(email, token, reset_url)
             res = jsonify(
-                {'Message': 'A password reset token has been sent to your email.'})
+                {'Message': 'A password reset link has been sent to your email.'})
 
     return res
