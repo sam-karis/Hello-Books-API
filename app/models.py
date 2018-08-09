@@ -83,7 +83,8 @@ class Books(db.Model):
         """Serialize history log"""
         return {
             'Title': self.title,
-            'Author': self.author
+            'Author': self.author,
+            'deleted': self.soft_deleted
         }
 
 

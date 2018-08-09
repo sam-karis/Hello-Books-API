@@ -165,7 +165,7 @@ class TestAuthEndpoints(unittest.TestCase):
                 '/api/v2/auth/reset-password',
                 data=json.dumps(self.user_reset),
                 headers={'content-type': 'application/json'})
-            self.assertIn('A password reset token has been sent to your email.',
+            self.assertIn('A password reset link has been sent to your email.',
                           str(response.data))
             token = outbox[0].body
             wrong_token = token[::-1]
