@@ -1,5 +1,6 @@
 """Hello Books models."""
 from app import db
+from sqlalchemy import desc
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 
@@ -99,11 +100,11 @@ class BookHistory(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey(Books.book_id))
 
     def get_user_history(email):
-        return BookHistory.query.filter_by(user_email=email).all()
+        return BookHistory.query.filter_by(user_email=email).order_by(desc(BookHistory.time_borrowed)).all()
 
     def get_books_not_returned(email):
         return BookHistory.query.filter_by(
-            user_email=email, returned=False).all()
+            user_email=email, returned=False).order_by(desc(BookHistory.time_borrowed)).all()
 
     def get_book_by_id(book_id, email):
         return BookHistory.query.filter_by(
