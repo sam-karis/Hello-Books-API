@@ -1,6 +1,7 @@
 import json
 from flask import jsonify, request
 from flask_paginate import Pagination
+from sqlalchemy import desc
 
 # Local imports
 from . import book
@@ -14,7 +15,7 @@ def get_all_book():
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', books_in_library, type=int)
 
-    BOOKS = Books.query.filter_by(soft_deleted=False).order_by(Books.book_id).paginate(
+    BOOKS = Books.query.filter_by(soft_deleted=False).order_by(desc(Books.book_id)).paginate(
         per_page=int(limit), page=int(page), error_out=False)
 
     if not BOOKS.items:
@@ -27,7 +28,8 @@ def get_all_book():
                 "current page": BOOKS.page,
                 "next page": BOOKS.next_num,
                 "prev page": BOOKS.prev_num}
-        response = jsonify(General_information= info, books=[item.serialize for item in BOOKS.items])
+        response = jsonify(General_information=info, books=[
+                           item.serialize for item in BOOKS.items])
     return response
 
 
@@ -38,7 +40,8 @@ def get_specific_book_by_id(bookId):
         bookId = int(bookId)
 
         # Get book with that id from db.
-        book = Books.query.filter_by(book_id=bookId, soft_deleted=False).first()
+        book = Books.query.filter_by(
+            book_id=bookId, soft_deleted=False).first()
         # Check if such a book exist in db.
         if not book:
             return jsonify({'Message': 'No book with that Id.', 'status': 204})
